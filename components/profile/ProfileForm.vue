@@ -392,18 +392,10 @@ defineExpose({ userData: state })
 
 				<!-- Social links validation message -->
 				<p
-					v-if="
-						errors.find(
-							e => e.name.startsWith('socials') && e.name.length === 7,
-						)
-					"
+					v-if="errors.find(e => e.name === 'socials')"
 					class="text-red-500 text-sm mb-4 bg-red-50 p-2 rounded"
 				>
-					{{
-						errors.find(
-							e => e.name.startsWith('socials') && e.name.length === 7,
-						)?.message
-					}}
+					{{ errors.find(e => e.name === 'socials')?.message }}
 				</p>
 
 				<!-- Empty state -->

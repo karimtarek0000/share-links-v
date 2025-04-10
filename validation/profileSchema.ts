@@ -21,7 +21,7 @@ export const profileSchema = z.object({
 					.trim()
 					.refine(
 						url => {
-							if (!url) return true // Allow empty URLs
+							if (!url) return false // No longer allow empty URLs
 
 							// Check for required format with complete domain
 							const regex =
@@ -36,7 +36,11 @@ export const profileSchema = z.object({
 				icon: z.string(),
 			}),
 		)
-		.min(1, 'At least one social link is required'),
+		.min(1, 'At least one social link is required')
+		.refine(links => links.some(link => link.url && link.url.trim() !== ''), {
+			message: 'At least one social link must have a valid URL',
+			path: ['socials'],
+		}),
 })
 
 // Type for validation errors
