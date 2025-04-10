@@ -191,7 +191,7 @@ defineExpose({ userData })
 					<div class="flex justify-between items-center mb-3">
 						<span class="flex items-center gap-2">
 							<UIcon :name="social.icon" class="text-lg" />
-							<span class="font-medium">Link #{{ index + 1 }}</span>
+							<span class="font-medium capitalize">{{ social.platform }}</span>
 						</span>
 						<UButton
 							color="error"
