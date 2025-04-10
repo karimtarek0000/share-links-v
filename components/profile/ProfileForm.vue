@@ -11,6 +11,30 @@ const state = reactive<UserData>({
 
 // Validation state
 const errors = ref<any[]>([])
+const fieldsToValidate = ref<Set<string>>(new Set())
+
+// Field-level validation
+const validateField = (fieldName: string) => {
+	if (fieldName.startsWith('socials.')) {
+		// For social URL fields, add to validation set
+		fieldsToValidate.value.add(fieldName)
+		// Also add the socials array itself to validate its length
+		fieldsToValidate.value.add('socials')
+	} else {
+		// For other fields, simply add to the set
+		fieldsToValidate.value.add(fieldName)
+	}
+
+	// Run validation only on touched fields
+	const filteredState = { ...state }
+	errors.value = validateProfile(filteredState).filter(
+		error =>
+			fieldsToValidate.value.has(error.name) ||
+			(error.name === 'socials' && fieldsToValidate.value.has('socials')),
+	)
+}
+
+// Legacy full validation method (still needed for form submission)
 const validateState = () => {
 	errors.value = validateProfile(state)
 }
@@ -101,15 +125,23 @@ function addSocialLink(): void {
 		url: '',
 		icon: 'i-mdi-link-variant',
 	})
+	// Validate socials array after adding a new link
+	validateField('socials')
 }
 
 // Remove a social media link
 function removeSocialLink(index: number): void {
 	state.socials.splice(index, 1)
+	// Validate socials array after removing a link
+	validateField('socials')
 }
 
 // Update platform when URL changes
-function updatePlatformFromUrl(url: string, index: number): void {
+function handleUrlChange(url: string, index: number): void {
+	// Validate the field
+	validateField(`socials.${index}.url`)
+
+	// Update platform detection
 	if (!url) return
 	const { platform, icon } = detectPlatform(url)
 	state.socials[index].platform = platform
@@ -120,7 +152,7 @@ function updatePlatformFromUrl(url: string, index: number): void {
 async function onSubmit(event: FormSubmitEvent<UserData>) {
 	isLoading.value = true
 
-	// Final validation before submission
+	// Final validation before submission - validate all fields
 	validateState()
 	if (errors.value.length > 0) {
 		toast.add({
@@ -259,6 +291,7 @@ defineExpose({ userData: state })
 					input-class="placeholder:text-gray-400 font-medium"
 					size="lg"
 					trailing-icon="i-mdi-pencil-outline"
+					@update:model-value="validateField('name')"
 				/>
 				<template #error>
 					<p
@@ -283,6 +316,7 @@ defineExpose({ userData: state })
 						class="focus-state-ring w-full shadow-sm"
 						input-class="placeholder:text-gray-400 font-medium pb-8"
 						size="lg"
+						@update:model-value="validateField('bio')"
 					/>
 					<div
 						class="absolute bottom-3 right-3 text-xs"
@@ -405,7 +439,7 @@ defineExpose({ userData: state })
 										: undefined
 								"
 								class="w-full"
-								@update:model-value="updatePlatformFromUrl(social.url, index)"
+								@update:model-value="handleUrlChange(social.url, index)"
 							/>
 							<template #error>
 								<p
