@@ -788,11 +788,11 @@ async function saveProfile(): Promise<void> {
 									<UFormGroup label="Platform" class="mb-3">
 										<USelectMenu
 											v-model="social.platform"
-											:items="
-												platformOptions.map(item => ({
-													...item,
-													leading: item.icon,
-												}))
+											:items="platformOptions"
+											:icon="
+												social.platform
+													? getPlatformIcon(social.platform)
+													: 'i-mdi-link-variant'
 											"
 											color="primary"
 											variant="outline"
@@ -800,7 +800,14 @@ async function saveProfile(): Promise<void> {
 											placeholder="Select platform"
 											value-attribute="value"
 											@update:model-value="setPlatform($event, index)"
-										/>
+										>
+											<template #item="{ item }">
+												<div class="flex items-center gap-2">
+													<UIcon :name="item.icon" class="flex-shrink-0" />
+													<span>{{ item.label }}</span>
+												</div>
+											</template>
+										</USelectMenu>
 									</UFormGroup>
 
 									<!-- Link input -->
