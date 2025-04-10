@@ -1,246 +1,443 @@
 <script setup lang="ts">
-const {
-	userData,
-	formErrors,
-	fileInput,
-	isDragging,
-	isLoading,
-	onImageSelected,
-	onDragOver,
-	onDragLeave,
-	onDrop,
-	removeProfileImage,
-	addSocialLink,
-	removeSocialLink,
-	updatePlatformFromUrl,
-	saveProfile,
-} = useProfileForm()
+import { validateProfile } from '@/validation/profileSchema'
+import type { FormSubmitEvent } from '@nuxt/ui'
+// Create reactive form state
+const state = reactive<UserData>({
+	name: '',
+	bio: '',
+	profileImage: null,
+	socials: [],
+})
+
+// Validation state
+const errors = ref<any[]>([])
+const validateState = () => {
+	errors.value = validateProfile(state)
+}
+
+// File upload state
+const fileInput = ref<HTMLInputElement | null>(null)
+const isDragging = ref(false)
+const isLoading = ref(false)
+
+// Platform detection
+const { detectPlatform } = useSocialPlatforms()
+const toast = useToast()
+
+// Handle image upload
+function onImageSelected(event: Event): void {
+	const target = event.target as HTMLInputElement
+	const file = target.files?.[0]
+
+	if (file) {
+		// Validate file size (max 5MB)
+		if (file.size > 5 * 1024 * 1024) {
+			toast.add({
+				title: 'File too large',
+				description: 'Profile image must be less than 5MB',
+				color: 'error',
+			})
+			return
+		}
+
+		// Validate file type
+		if (
+			!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(
+				file.type,
+			)
+		) {
+			toast.add({
+				title: 'Invalid file type',
+				description: 'Please upload a JPG, PNG, GIF or WEBP image',
+				color: 'error',
+			})
+			return
+		}
+
+		// Create object URL and clean up previous one if exists
+		if (state.profileImage && state.profileImage.startsWith('blob:')) {
+			URL.revokeObjectURL(state.profileImage)
+		}
+
+		state.profileImage = URL.createObjectURL(file)
+	}
+}
+
+// Handle drag and drop for image
+function onDragOver(event: DragEvent): void {
+	event.preventDefault()
+	isDragging.value = true
+}
+
+function onDragLeave(): void {
+	isDragging.value = false
+}
+
+function onDrop(event: DragEvent): void {
+	event.preventDefault()
+	isDragging.value = false
+
+	const files = event.dataTransfer?.files
+	if (files && files.length > 0) {
+		const fileInput = document.createElement('input')
+		fileInput.type = 'file'
+		fileInput.files = files
+		onImageSelected({ target: fileInput } as unknown as Event)
+	}
+}
+
+// Remove profile image
+function removeProfileImage(): void {
+	if (state.profileImage && state.profileImage.startsWith('blob:')) {
+		URL.revokeObjectURL(state.profileImage)
+	}
+	state.profileImage = null
+}
+
+// Add a new social media link
+function addSocialLink(): void {
+	state.socials.push({
+		platform: 'other',
+		url: '',
+		icon: 'i-mdi-link-variant',
+	})
+}
+
+// Remove a social media link
+function removeSocialLink(index: number): void {
+	state.socials.splice(index, 1)
+}
+
+// Update platform when URL changes
+function updatePlatformFromUrl(url: string, index: number): void {
+	if (!url) return
+	const { platform, icon } = detectPlatform(url)
+	state.socials[index].platform = platform
+	state.socials[index].icon = icon
+}
+
+// Form submission handler
+async function onSubmit(event: FormSubmitEvent<UserData>) {
+	isLoading.value = true
+
+	// Final validation before submission
+	validateState()
+	if (errors.value.length > 0) {
+		toast.add({
+			title: 'Validation Error',
+			description: 'Please fix the errors in the form',
+			color: 'error',
+		})
+		isLoading.value = false
+		return
+	}
+
+	try {
+		// Simulate API call
+		await new Promise(resolve => setTimeout(resolve, 1000))
+
+		toast.add({
+			title: 'Success!',
+			description: 'Your profile has been saved',
+			color: 'success',
+		})
+
+		// Here you would actually save the data to your backend
+		console.log(event.data)
+	} catch (error) {
+		toast.add({
+			title: 'Error',
+			description: 'Failed to save your profile',
+			color: 'error',
+		})
+	} finally {
+		isLoading.value = false
+	}
+}
 
 // Make userData available to parent components
-defineExpose({ userData })
+defineExpose({ userData: state })
 </script>
 
 <template>
-	<UCard class="shadow-lg">
-		<template #header>
-			<div class="px-4 pt-4 pb-2">
-				<h2 class="text-2xl font-semibold">Customize Your Links</h2>
-				<p class="text-sm text-gray-600 mt-1">
-					Update your profile information and manage your social links
-				</p>
-			</div>
-		</template>
+	<UForm
+		:validate="validateProfile"
+		:state="state"
+		class="space-y-6"
+		@submit="onSubmit"
+	>
+		<UCard class="shadow-lg">
+			<template #header>
+				<div class="px-4 pt-4 pb-2">
+					<h2 class="text-2xl font-semibold">Customize Your Links</h2>
+					<p class="text-sm text-gray-600 mt-1">
+						Update your profile information and manage your social links
+					</p>
+				</div>
+			</template>
 
-		<!-- Profile Image Upload -->
-		<div class="mb-6">
-			<UFormGroup label="Profile Image">
-				<div
-					class="p-6 border-2 border-dashed rounded-xl flex flex-col items-center justify-center"
-					:class="
-						isDragging ? 'border-primary bg-primary/5' : 'border-gray-300'
-					"
-					@dragover="onDragOver"
-					@dragleave="onDragLeave"
-					@drop="onDrop"
-				>
-					<div class="flex items-center space-x-4">
-						<div
-							class="w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border relative group"
-							:class="
-								userData.profileImage ? 'border-primary' : 'border-gray-300'
-							"
-						>
-							<img
-								v-if="userData.profileImage"
-								:src="userData.profileImage"
-								class="w-full h-full object-cover"
-								alt="Profile"
-							/>
-							<UIcon
-								v-else
-								name="i-mdi-account"
-								class="text-gray-400 text-3xl"
-							/>
-
-							<!-- Hover overlay -->
+			<!-- Profile Image Upload -->
+			<div class="mb-6">
+				<UFormGroup label="Profile Image">
+					<div
+						class="p-6 border-2 border-dashed rounded-xl flex flex-col items-center justify-center"
+						:class="
+							isDragging ? 'border-primary bg-primary/5' : 'border-gray-300'
+						"
+						@dragover="onDragOver"
+						@dragleave="onDragLeave"
+						@drop="onDrop"
+					>
+						<div class="flex items-center space-x-4">
 							<div
-								v-if="userData.profileImage"
-								class="absolute inset-0 bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-								@click="removeProfileImage"
+								class="w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border relative group"
+								:class="
+									state.profileImage ? 'border-primary' : 'border-gray-300'
+								"
 							>
-								<UIcon name="i-mdi-trash" class="text-white text-xl" />
+								<img
+									v-if="state.profileImage"
+									:src="state.profileImage"
+									class="w-full h-full object-cover"
+									alt="Profile"
+								/>
+								<UIcon
+									v-else
+									name="i-mdi-account"
+									class="text-gray-400 text-3xl"
+								/>
+
+								<!-- Hover overlay -->
+								<div
+									v-if="state.profileImage"
+									class="absolute inset-0 bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+									@click="removeProfileImage"
+								>
+									<UIcon name="i-mdi-trash" class="text-white text-xl" />
+								</div>
+							</div>
+
+							<div class="space-y-2">
+								<UButton
+									color="primary"
+									variant="soft"
+									icon="i-mdi-upload"
+									@click="fileInput?.click()"
+								>
+									Upload Image
+								</UButton>
+								<p class="text-xs text-gray-500">
+									JPG, PNG, GIF or WEBP (max 5MB)
+								</p>
 							</div>
 						</div>
 
-						<div class="space-y-2">
-							<UButton
-								color="primary"
-								variant="soft"
-								icon="i-mdi-upload"
-								@click="fileInput?.click()"
-							>
-								Upload Image
-							</UButton>
-							<p class="text-xs text-gray-500">
-								JPG, PNG, GIF or WEBP (max 5MB)
-							</p>
-						</div>
+						<input
+							ref="fileInput"
+							type="file"
+							hidden
+							accept="image/jpeg,image/png,image/gif,image/webp"
+							@change="onImageSelected"
+						/>
+
+						<p class="text-sm text-gray-500 mt-4">
+							<UIcon name="i-mdi-information-outline" class="inline mr-1" />
+							Drag and drop an image here, or click to browse
+						</p>
 					</div>
+				</UFormGroup>
+			</div>
 
-					<input
-						ref="fileInput"
-						type="file"
-						hidden
-						accept="image/jpeg,image/png,image/gif,image/webp"
-						@change="onImageSelected"
-					/>
-
-					<p class="text-sm text-gray-500 mt-4">
-						<UIcon name="i-mdi-information-outline" class="inline mr-1" />
-						Drag and drop an image here, or click to browse
-					</p>
-				</div>
-			</UFormGroup>
-		</div>
-
-		<!-- TODO: Start -->
-		<!-- Name Input -->
-		<div class="mb-6">
-			<UFormGroup label="Display Name" :error="formErrors.name || undefined">
+			<!-- Name Input -->
+			<UFormField name="name" label="Display Name">
 				<UInput
-					v-model="userData.name"
+					v-model="state.name"
 					placeholder="Your name"
 					icon="i-mdi-account"
+					:color="errors.find(e => e.name === 'name') ? 'error' : undefined"
 					class="focus-state-ring w-full shadow-sm hover:border-gray-400"
 					input-class="placeholder:text-gray-400 font-medium"
 					size="lg"
 					trailing-icon="i-mdi-pencil-outline"
 				/>
-			</UFormGroup>
-		</div>
+				<template #error>
+					<p
+						v-if="errors.find(e => e.name === 'name')"
+						class="text-red-500 text-sm animate-pulse"
+					>
+						{{ errors.find(e => e.name === 'name')?.message }}
+					</p>
+				</template>
+			</UFormField>
 
-		<!-- Bio Input -->
-		<div class="mb-8">
-			<UFormGroup label="Short Bio" :error="formErrors.bio || undefined">
+			<!-- Bio Input -->
+			<UFormField name="bio" label="Short Bio" class="mt-6 mb-8">
 				<div class="relative">
 					<UTextarea
 						style="resize: none"
-						v-model="userData.bio"
+						v-model="state.bio"
 						placeholder="A short description about you"
 						:rows="5"
 						maxlength="150"
+						:color="errors.find(e => e.name === 'bio') ? 'error' : undefined"
 						class="focus-state-ring w-full shadow-sm"
-						input-class="placeholder:text-gray-400 font-medium"
+						input-class="placeholder:text-gray-400 font-medium pb-8"
 						size="lg"
 					/>
-					<span class="absolute bottom-2 right-3 text-xs text-gray-500"
-						>{{ userData.bio.length }}/150</span
+					<div
+						class="absolute bottom-3 right-3 text-xs"
+						:class="state.bio.length > 150 ? 'text-red-500' : 'text-gray-500'"
 					>
-				</div>
-			</UFormGroup>
-		</div>
-
-		<!-- TODO: end -->
-
-		<!-- Social Links Section -->
-		<div>
-			<div
-				class="flex justify-between items-center mb-5 bg-gray-50 p-4 rounded-lg"
-			>
-				<div>
-					<h3 class="text-lg font-medium flex items-center gap-2">
-						<UIcon name="i-mdi-link-variant" class="text-primary" />
-						Your Social Links
-					</h3>
-					<p class="text-sm text-gray-600">Add links to your social profiles</p>
-				</div>
-				<UButton
-					color="primary"
-					variant="soft"
-					icon="i-mdi-plus"
-					@click="addSocialLink"
-				>
-					Add Link
-				</UButton>
-			</div>
-
-			<!-- Empty state -->
-			<div
-				v-if="!userData.socials.length"
-				class="text-center bg-gray-50 p-8 rounded-lg mb-5"
-			>
-				<UIcon name="i-mdi-link-off" class="text-gray-400 text-4xl mx-auto" />
-				<h4 class="text-gray-600 font-medium mt-3">No links added yet</h4>
-				<p class="text-gray-500 text-sm mt-2">
-					Add your first social media link to get started
-				</p>
-				<UButton
-					color="primary"
-					class="mt-4"
-					icon="i-mdi-plus"
-					@click="addSocialLink"
-				>
-					Add Your First Link
-				</UButton>
-			</div>
-
-			<!-- Social Links Inputs -->
-			<TransitionGroup name="links-list" tag="div" class="space-y-4">
-				<div
-					v-for="(social, index) in userData.socials"
-					:key="index"
-					class="bg-gray-50 p-5 rounded-lg border border-gray-100 shadow-sm"
-				>
-					<div class="flex justify-between items-center mb-3">
-						<span class="flex items-center gap-2">
-							<UIcon :name="social.icon" class="text-lg" />
-							<span class="font-medium capitalize">{{ social.platform }}</span>
-						</span>
-						<UButton
-							color="error"
-							icon="i-mdi-delete"
-							variant="ghost"
-							size="sm"
-							@click="removeSocialLink(index)"
-						/>
+						{{ state.bio.length }}/150
 					</div>
-
-					<!-- Link input -->
-					<UFormGroup
-						label="Link"
-						:error="formErrors.socials[index] || undefined"
-					>
-						<UInput
-							v-model="social.url"
-							:placeholder="
-								social.platform
-									? `Your ${social.platform} profile URL`
-									: 'https://example.com/your-profile'
-							"
-							icon="i-mdi-link-variant"
-							class="w-full"
-							@update:model-value="updatePlatformFromUrl(social.url, index)"
-						/>
-					</UFormGroup>
 				</div>
-			</TransitionGroup>
-		</div>
+				<template #error>
+					<p
+						v-if="errors.find(e => e.name === 'bio')"
+						class="text-red-500 text-sm animate-pulse"
+					>
+						{{ errors.find(e => e.name === 'bio')?.message }}
+					</p>
+				</template>
+			</UFormField>
 
-		<template #footer>
-			<!-- Save Button -->
-			<UButton
-				block
-				color="primary"
-				size="lg"
-				:loading="isLoading"
-				:disabled="isLoading"
-				@click="saveProfile"
-			>
-				<UIcon name="i-mdi-check" class="mr-1" />
-				Save Profile
-			</UButton>
-		</template>
-	</UCard>
+			<!-- Social Links Section -->
+			<div>
+				<div
+					class="flex justify-between items-center mb-5 bg-gray-50 p-4 rounded-lg"
+				>
+					<div>
+						<h3 class="text-lg font-medium flex items-center gap-2">
+							<UIcon name="i-mdi-link-variant" class="text-primary" />
+							Your Social Links
+						</h3>
+						<p class="text-sm text-gray-600">
+							Add links to your social profiles
+						</p>
+					</div>
+					<UButton
+						color="primary"
+						variant="soft"
+						icon="i-mdi-plus"
+						@click="addSocialLink"
+					>
+						Add Link
+					</UButton>
+				</div>
+
+				<!-- Social links validation message -->
+				<p
+					v-if="
+						errors.find(
+							e => e.name.startsWith('socials') && e.name.length === 7,
+						)
+					"
+					class="text-red-500 text-sm mb-4 bg-red-50 p-2 rounded"
+				>
+					{{
+						errors.find(
+							e => e.name.startsWith('socials') && e.name.length === 7,
+						)?.message
+					}}
+				</p>
+
+				<!-- Empty state -->
+				<div
+					v-if="!state.socials.length"
+					class="text-center bg-gray-50 p-8 rounded-lg mb-5"
+				>
+					<UIcon name="i-mdi-link-off" class="text-gray-400 text-4xl mx-auto" />
+					<h4 class="text-gray-600 font-medium mt-3">No links added yet</h4>
+					<p class="text-gray-500 text-sm mt-2">
+						Add your first social media link to get started
+					</p>
+					<UButton
+						color="primary"
+						class="mt-4"
+						icon="i-mdi-plus"
+						@click="addSocialLink"
+					>
+						Add Your First Link
+					</UButton>
+				</div>
+
+				<!-- Social Links Inputs -->
+				<TransitionGroup name="links-list" tag="div" class="space-y-4">
+					<div
+						v-for="(social, index) in state.socials"
+						:key="index"
+						class="bg-gray-50 p-5 rounded-lg border border-gray-100 shadow-sm"
+						:class="
+							errors.find(e => e.name === `socials.${index}.url`)
+								? 'border-red-300'
+								: ''
+						"
+					>
+						<div class="flex justify-between items-center mb-3">
+							<span class="flex items-center gap-2">
+								<UIcon :name="social.icon" class="text-lg" />
+								<span class="font-medium capitalize">{{
+									social.platform
+								}}</span>
+							</span>
+							<UButton
+								color="error"
+								icon="i-mdi-delete"
+								variant="ghost"
+								size="sm"
+								@click="removeSocialLink(index)"
+							/>
+						</div>
+
+						<!-- Link input -->
+						<UFormField :name="`socials.${index}.url`" label="Link">
+							<UInput
+								v-model="social.url"
+								:placeholder="
+									social.platform
+										? `Your ${social.platform} profile URL`
+										: 'https://example.com/your-profile'
+								"
+								icon="i-mdi-link-variant"
+								:color="
+									errors.find(e => e.name === `socials.${index}.url`)
+										? 'error'
+										: undefined
+								"
+								class="w-full"
+								@update:model-value="updatePlatformFromUrl(social.url, index)"
+							/>
+							<template #error>
+								<p
+									v-if="errors.find(e => e.name === `socials.${index}.url`)"
+									class="text-red-500 text-sm animate-pulse"
+								>
+									{{
+										errors.find(e => e.name === `socials.${index}.url`)?.message
+									}}
+								</p>
+							</template>
+						</UFormField>
+					</div>
+				</TransitionGroup>
+			</div>
+
+			<template #footer>
+				<!-- Save Button -->
+				<UButton
+					type="submit"
+					block
+					color="primary"
+					size="lg"
+					:loading="isLoading"
+					:disabled="isLoading || errors.length > 0"
+				>
+					<UIcon name="i-mdi-check" class="mr-1" />
+					Save Profile
+				</UButton>
+			</template>
+		</UCard>
+	</UForm>
 </template>
 
 <style scoped>
