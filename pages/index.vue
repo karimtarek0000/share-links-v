@@ -130,12 +130,26 @@ function removeSocialLink(index: number): void {
 const platformOptions: PlatformOption[] = [
 	{ value: 'instagram', label: 'Instagram', icon: 'i-mdi-instagram' },
 	{ value: 'twitter', label: 'Twitter/X', icon: 'i-mdi-twitter' },
-	{ value: 'linkedin', label: 'LinkedIn', icon: 'i-mdi-linkedin' },
-	{ value: 'github', label: 'GitHub', icon: 'i-mdi-github' },
 	{ value: 'facebook', label: 'Facebook', icon: 'i-mdi-facebook' },
+	{ value: 'linkedin', label: 'LinkedIn', icon: 'i-mdi-linkedin' },
 	{ value: 'youtube', label: 'YouTube', icon: 'i-mdi-youtube' },
 	{ value: 'tiktok', label: 'TikTok', icon: 'i-mdi-music-note' },
-	{ value: 'other', label: 'Other', icon: 'i-mdi-link-variant' },
+	{ value: 'snapchat', label: 'Snapchat', icon: 'i-mdi-snapchat' },
+	{ value: 'pinterest', label: 'Pinterest', icon: 'i-mdi-pinterest' },
+	{ value: 'github', label: 'GitHub', icon: 'i-mdi-github' },
+	{ value: 'dribbble', label: 'Dribbble', icon: 'i-mdi-dribbble' },
+	{ value: 'behance', label: 'Behance', icon: 'i-mdi-behance' },
+	{ value: 'medium', label: 'Medium', icon: 'i-mdi-medium' },
+	{ value: 'discord', label: 'Discord', icon: 'i-mdi-discord' },
+	{ value: 'slack', label: 'Slack', icon: 'i-mdi-slack' },
+	{ value: 'telegram', label: 'Telegram', icon: 'i-mdi-telegram' },
+	{ value: 'whatsapp', label: 'WhatsApp', icon: 'i-mdi-whatsapp' },
+	{ value: 'reddit', label: 'Reddit', icon: 'i-mdi-reddit' },
+	{ value: 'twitch', label: 'Twitch', icon: 'i-mdi-twitch' },
+	{ value: 'spotify', label: 'Spotify', icon: 'i-mdi-spotify' },
+	{ value: 'soundcloud', label: 'SoundCloud', icon: 'i-mdi-soundcloud' },
+	{ value: 'vimeo', label: 'Vimeo', icon: 'i-mdi-vimeo' },
+	{ value: 'other', label: 'Other Link', icon: 'i-mdi-link-variant' },
 ]
 
 // Platform colors for styling
@@ -150,19 +164,101 @@ const platformColors: Record<string, PlatformColors> = {
 		text: 'text-blue-500',
 		hover: 'hover:bg-blue-100',
 	},
-	linkedin: {
-		bg: 'bg-blue-100',
-		text: 'text-blue-700',
-		hover: 'hover:bg-blue-200',
-	},
-	github: { bg: 'bg-gray-800', text: 'text-white', hover: 'hover:bg-gray-700' },
 	facebook: {
 		bg: 'bg-blue-600',
 		text: 'text-white',
 		hover: 'hover:bg-blue-700',
 	},
-	youtube: { bg: 'bg-red-50', text: 'text-red-600', hover: 'hover:bg-red-100' },
-	tiktok: { bg: 'bg-black', text: 'text-white', hover: 'hover:bg-gray-900' },
+	linkedin: {
+		bg: 'bg-blue-100',
+		text: 'text-blue-700',
+		hover: 'hover:bg-blue-200',
+	},
+	youtube: {
+		bg: 'bg-red-50',
+		text: 'text-red-600',
+		hover: 'hover:bg-red-100',
+	},
+	tiktok: {
+		bg: 'bg-black',
+		text: 'text-white',
+		hover: 'hover:bg-gray-900',
+	},
+	snapchat: {
+		bg: 'bg-yellow-300',
+		text: 'text-black',
+		hover: 'hover:bg-yellow-200',
+	},
+	pinterest: {
+		bg: 'bg-red-500',
+		text: 'text-white',
+		hover: 'hover:bg-red-600',
+	},
+	github: {
+		bg: 'bg-gray-800',
+		text: 'text-white',
+		hover: 'hover:bg-gray-700',
+	},
+	dribbble: {
+		bg: 'bg-pink-500',
+		text: 'text-white',
+		hover: 'hover:bg-pink-600',
+	},
+	behance: {
+		bg: 'bg-blue-700',
+		text: 'text-white',
+		hover: 'hover:bg-blue-800',
+	},
+	medium: {
+		bg: 'bg-green-50',
+		text: 'text-green-900',
+		hover: 'hover:bg-green-100',
+	},
+	discord: {
+		bg: 'bg-indigo-500',
+		text: 'text-white',
+		hover: 'hover:bg-indigo-600',
+	},
+	slack: {
+		bg: 'bg-purple-500',
+		text: 'text-white',
+		hover: 'hover:bg-purple-600',
+	},
+	telegram: {
+		bg: 'bg-sky-500',
+		text: 'text-white',
+		hover: 'hover:bg-sky-600',
+	},
+	whatsapp: {
+		bg: 'bg-green-500',
+		text: 'text-white',
+		hover: 'hover:bg-green-600',
+	},
+	reddit: {
+		bg: 'bg-orange-500',
+		text: 'text-white',
+		hover: 'hover:bg-orange-600',
+	},
+	twitch: {
+		bg: 'bg-purple-600',
+		text: 'text-white',
+		hover: 'hover:bg-purple-700',
+	},
+	spotify: {
+		bg: 'bg-green-600',
+		text: 'text-white',
+		hover: 'hover:bg-green-700',
+	},
+	soundcloud: {
+		bg: 'bg-orange-400',
+		text: 'text-white',
+		hover: 'hover:bg-orange-500',
+	},
+	vimeo: {
+		bg: 'bg-sky-400',
+		text: 'text-white',
+		hover: 'hover:bg-sky-500',
+	},
 	other: {
 		bg: 'bg-gray-100',
 		text: 'text-gray-800',
@@ -181,21 +277,63 @@ function detectPlatform(url: string, index: number): void {
 	} else if (url.includes('twitter') || url.includes('x.com')) {
 		userData.socials[index].platform = 'twitter'
 		userData.socials[index].icon = 'i-mdi-twitter'
-	} else if (url.includes('linkedin')) {
-		userData.socials[index].platform = 'linkedin'
-		userData.socials[index].icon = 'i-mdi-linkedin'
-	} else if (url.includes('github')) {
-		userData.socials[index].platform = 'github'
-		userData.socials[index].icon = 'i-mdi-github'
 	} else if (url.includes('facebook') || url.includes('fb.com')) {
 		userData.socials[index].platform = 'facebook'
 		userData.socials[index].icon = 'i-mdi-facebook'
+	} else if (url.includes('linkedin')) {
+		userData.socials[index].platform = 'linkedin'
+		userData.socials[index].icon = 'i-mdi-linkedin'
 	} else if (url.includes('youtube') || url.includes('youtu.be')) {
 		userData.socials[index].platform = 'youtube'
 		userData.socials[index].icon = 'i-mdi-youtube'
 	} else if (url.includes('tiktok')) {
 		userData.socials[index].platform = 'tiktok'
 		userData.socials[index].icon = 'i-mdi-music-note'
+	} else if (url.includes('snapchat')) {
+		userData.socials[index].platform = 'snapchat'
+		userData.socials[index].icon = 'i-mdi-snapchat'
+	} else if (url.includes('pinterest')) {
+		userData.socials[index].platform = 'pinterest'
+		userData.socials[index].icon = 'i-mdi-pinterest'
+	} else if (url.includes('github')) {
+		userData.socials[index].platform = 'github'
+		userData.socials[index].icon = 'i-mdi-github'
+	} else if (url.includes('dribbble')) {
+		userData.socials[index].platform = 'dribbble'
+		userData.socials[index].icon = 'i-mdi-dribbble'
+	} else if (url.includes('behance')) {
+		userData.socials[index].platform = 'behance'
+		userData.socials[index].icon = 'i-mdi-behance'
+	} else if (url.includes('medium')) {
+		userData.socials[index].platform = 'medium'
+		userData.socials[index].icon = 'i-mdi-medium'
+	} else if (url.includes('discord')) {
+		userData.socials[index].platform = 'discord'
+		userData.socials[index].icon = 'i-mdi-discord'
+	} else if (url.includes('slack')) {
+		userData.socials[index].platform = 'slack'
+		userData.socials[index].icon = 'i-mdi-slack'
+	} else if (url.includes('telegram')) {
+		userData.socials[index].platform = 'telegram'
+		userData.socials[index].icon = 'i-mdi-telegram'
+	} else if (url.includes('whatsapp')) {
+		userData.socials[index].platform = 'whatsapp'
+		userData.socials[index].icon = 'i-mdi-whatsapp'
+	} else if (url.includes('reddit')) {
+		userData.socials[index].platform = 'reddit'
+		userData.socials[index].icon = 'i-mdi-reddit'
+	} else if (url.includes('twitch')) {
+		userData.socials[index].platform = 'twitch'
+		userData.socials[index].icon = 'i-mdi-twitch'
+	} else if (url.includes('spotify')) {
+		userData.socials[index].platform = 'spotify'
+		userData.socials[index].icon = 'i-mdi-spotify'
+	} else if (url.includes('soundcloud')) {
+		userData.socials[index].platform = 'soundcloud'
+		userData.socials[index].icon = 'i-mdi-soundcloud'
+	} else if (url.includes('vimeo')) {
+		userData.socials[index].platform = 'vimeo'
+		userData.socials[index].icon = 'i-mdi-vimeo'
 	} else {
 		userData.socials[index].platform = 'other'
 		userData.socials[index].icon = 'i-mdi-link-variant'
@@ -211,6 +349,14 @@ function setPlatform(platform: string, index: number): void {
 	if (platformInfo) {
 		userData.socials[index].icon = platformInfo.icon
 	}
+}
+
+// Get platform icon for display in select menu
+function getPlatformIcon(platform: string): string {
+	if (!platform) return 'i-mdi-link-variant'
+
+	const platformInfo = platformOptions.find(p => p.value === platform)
+	return platformInfo?.icon || 'i-mdi-link-variant'
 }
 
 // Validate form
@@ -642,20 +788,19 @@ async function saveProfile(): Promise<void> {
 									<UFormGroup label="Platform" class="mb-3">
 										<USelectMenu
 											v-model="social.platform"
-											:options="platformOptions"
+											:items="
+												platformOptions.map(item => ({
+													...item,
+													leading: item.icon,
+												}))
+											"
 											color="primary"
 											variant="outline"
 											class="w-full"
 											placeholder="Select platform"
-											@change="setPlatform(social.platform, index)"
-										>
-											<template #option="{ option }">
-												<div class="flex items-center gap-2">
-													<UIcon :name="option.icon" class="flex-shrink-0" />
-													<span>{{ option.label }}</span>
-												</div>
-											</template>
-										</USelectMenu>
+											value-attribute="value"
+											@update:model-value="setPlatform($event, index)"
+										/>
 									</UFormGroup>
 
 									<!-- Link input -->
