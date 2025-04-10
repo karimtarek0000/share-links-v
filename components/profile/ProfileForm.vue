@@ -113,6 +113,10 @@ defineExpose({ userData })
 					v-model="userData.name"
 					placeholder="Your name"
 					icon="i-mdi-account"
+					class="focus-state-ring w-full shadow-sm hover:border-gray-400"
+					input-class="placeholder:text-gray-400 font-medium"
+					size="lg"
+					trailing-icon="i-mdi-pencil-outline"
 				/>
 			</UFormGroup>
 		</div>
@@ -125,10 +129,14 @@ defineExpose({ userData })
 				:error="formErrors.bio || undefined"
 			>
 				<UTextarea
+					style="resize: none"
 					v-model="userData.bio"
 					placeholder="A short description about you"
-					:rows="2"
+					:rows="5"
 					maxlength="150"
+					class="focus-state-ring w-full shadow-sm"
+					input-class="placeholder:text-gray-400 font-medium"
+					size="lg"
 				/>
 			</UFormGroup>
 		</div>
