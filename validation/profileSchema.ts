@@ -16,19 +16,23 @@ export const profileSchema = z.object({
 		.array(
 			z.object({
 				platform: z.string(),
-				url: z.string().refine(url => {
-					if (!url.trim()) return true // Allow empty URLs
-					try {
-						const urlToCheck =
-							!url.startsWith('http://') && !url.startsWith('https://')
-								? 'https://' + url
-								: url
-						const urlObj = new URL(urlToCheck)
-						return urlObj.hostname.includes('.') && urlObj.hostname.length > 3
-					} catch {
-						return false
-					}
-				}, 'Please enter a valid URL'),
+				url: z
+					.string()
+					.trim()
+					.refine(
+						url => {
+							if (!url) return true // Allow empty URLs
+
+							// Check for required format with complete domain
+							const regex =
+								/^https?:\/\/www\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$/
+							return regex.test(url)
+						},
+						{
+							message:
+								'URL must be a complete address (e.g., https://www.google.com)',
+						},
+					),
 				icon: z.string(),
 			}),
 		)
