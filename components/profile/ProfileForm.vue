@@ -123,21 +123,22 @@ defineExpose({ userData })
 
 		<!-- Bio Input -->
 		<div class="mb-8">
-			<UFormGroup
-				label="Short Bio"
-				:hint="`${userData.bio.length}/150 characters`"
-				:error="formErrors.bio || undefined"
-			>
-				<UTextarea
-					style="resize: none"
-					v-model="userData.bio"
-					placeholder="A short description about you"
-					:rows="5"
-					maxlength="150"
-					class="focus-state-ring w-full shadow-sm"
-					input-class="placeholder:text-gray-400 font-medium"
-					size="lg"
-				/>
+			<UFormGroup label="Short Bio" :error="formErrors.bio || undefined">
+				<div class="relative">
+					<UTextarea
+						style="resize: none"
+						v-model="userData.bio"
+						placeholder="A short description about you"
+						:rows="5"
+						maxlength="150"
+						class="focus-state-ring w-full shadow-sm"
+						input-class="placeholder:text-gray-400 font-medium"
+						size="lg"
+					/>
+					<span class="absolute bottom-2 right-3 text-xs text-gray-500"
+						>{{ userData.bio.length }}/150</span
+					>
+				</div>
 			</UFormGroup>
 		</div>
 
