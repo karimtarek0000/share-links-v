@@ -12,10 +12,59 @@ interface PlatformColors {
 	hover: string
 }
 
+// Define types for platform options with specific string keys
+type PlatformKey =
+	| 'instagram'
+	| 'twitter'
+	| 'facebook'
+	| 'linkedin'
+	| 'youtube'
+	| 'tiktok'
+	| 'snapchat'
+	| 'pinterest'
+	| 'github'
+	| 'dribbble'
+	| 'behance'
+	| 'medium'
+	| 'discord'
+	| 'slack'
+	| 'telegram'
+	| 'whatsapp'
+	| 'reddit'
+	| 'twitch'
+	| 'spotify'
+	| 'soundcloud'
+	| 'vimeo'
+	| 'other'
+
 interface PlatformOption {
-	value: string
+	value: PlatformKey
 	label: string
 	icon: string
+}
+
+// Define functions outside of reactive state
+// URL validation helper
+function isValidUrl(url: string): boolean {
+	try {
+		// Add protocol if missing
+		if (!url.startsWith('http://') && !url.startsWith('https://')) {
+			url = 'https://' + url
+		}
+		new URL(url)
+		return true
+	} catch {
+		return false
+	}
+}
+
+// Format URL (ensure it has protocol)
+function formatUrl(url: string): string {
+	if (!url) return ''
+	if (!url.startsWith('http://') && !url.startsWith('https://')) {
+		return 'https://' + url
+	}
+	return url
 }
 
 // Define reactive state for form data
@@ -24,10 +73,10 @@ const userData = reactive({
 	bio: '',
 	profileImage: '' as string | null,
 	socials: [
-		{ platform: 'instagram', url: '', icon: 'i-mdi-instagram' },
-		{ platform: 'twitter', url: '', icon: 'i-mdi-twitter' },
-		{ platform: 'linkedin', url: '', icon: 'i-mdi-linkedin' },
-	] as SocialLink[],
+		{ platform: 'instagram' as PlatformKey, url: '', icon: 'i-mdi-instagram' },
+		{ platform: 'twitter' as PlatformKey, url: '', icon: 'i-mdi-twitter' },
+		{ platform: 'linkedin' as PlatformKey, url: '', icon: 'i-mdi-linkedin' },
+	] as Array<{ platform: PlatformKey | string; url: string; icon: string }>,
 })
 
 // Form validation state
@@ -43,117 +92,78 @@ const isDragging = ref(false)
 const toast = useToast()
 const isLoading = ref(false)
 
-// Handle image upload
-function onImageSelected(event: Event): void {
-	const target = event.target as HTMLInputElement
-	const file = target.files?.[0]
-
-	if (file) {
-		// Validate file size (max 5MB)
-		if (file.size > 5 * 1024 * 1024) {
-			toast.add({
-				title: 'File too large',
-				description: 'Profile image must be less than 5MB',
-				color: 'error',
-			})
-			return
-		}
-
-		// Validate file type
-		if (
-			!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(
-				file.type,
-			)
-		) {
-			toast.add({
-				title: 'Invalid file type',
-				description: 'Please upload a JPG, PNG, GIF or WEBP image',
-				color: 'error',
-			})
-			return
-		}
-
-		// Create object URL and clean up previous one if exists
-		if (userData.profileImage && userData.profileImage.startsWith('blob:')) {
-			URL.revokeObjectURL(userData.profileImage)
-		}
-
-		userData.profileImage = URL.createObjectURL(file)
-	}
-}
-
-// Handle drag and drop for image
-function onDragOver(event: DragEvent): void {
-	event.preventDefault()
-	isDragging.value = true
-}
-
-function onDragLeave(): void {
-	isDragging.value = false
-}
-
-function onDrop(event: DragEvent): void {
-	event.preventDefault()
-	isDragging.value = false
-
-	const files = event.dataTransfer?.files
-	if (files && files.length > 0) {
-		const fileInput = document.createElement('input')
-		fileInput.type = 'file'
-		fileInput.files = files
-		onImageSelected({ target: fileInput } as unknown as Event)
-	}
-}
-
-// Remove profile image
-function removeProfileImage(): void {
-	if (userData.profileImage && userData.profileImage.startsWith('blob:')) {
-		URL.revokeObjectURL(userData.profileImage)
-	}
-	userData.profileImage = null
-}
-
-// Add a new social media link
-function addSocialLink(): void {
-	userData.socials.push({ platform: '', url: '', icon: 'i-mdi-link-variant' })
-	// Also add a corresponding error slot
-	formErrors.socials.push('')
-}
-
-// Remove a social media link
-function removeSocialLink(index: number): void {
-	userData.socials.splice(index, 1)
-	formErrors.socials.splice(index, 1)
-}
-
-// Platform options for dropdown
-const platformOptions: PlatformOption[] = [
-	{ value: 'instagram', label: 'Instagram', icon: 'i-mdi-instagram' },
-	{ value: 'twitter', label: 'Twitter/X', icon: 'i-mdi-twitter' },
-	{ value: 'facebook', label: 'Facebook', icon: 'i-mdi-facebook' },
-	{ value: 'linkedin', label: 'LinkedIn', icon: 'i-mdi-linkedin' },
-	{ value: 'youtube', label: 'YouTube', icon: 'i-mdi-youtube' },
-	{ value: 'tiktok', label: 'TikTok', icon: 'i-mdi-music-note' },
-	{ value: 'snapchat', label: 'Snapchat', icon: 'i-mdi-snapchat' },
-	{ value: 'pinterest', label: 'Pinterest', icon: 'i-mdi-pinterest' },
-	{ value: 'github', label: 'GitHub', icon: 'i-mdi-github' },
-	{ value: 'dribbble', label: 'Dribbble', icon: 'i-mdi-dribbble' },
-	{ value: 'behance', label: 'Behance', icon: 'i-mdi-behance' },
-	{ value: 'medium', label: 'Medium', icon: 'i-mdi-medium' },
-	{ value: 'discord', label: 'Discord', icon: 'i-mdi-discord' },
-	{ value: 'slack', label: 'Slack', icon: 'i-mdi-slack' },
-	{ value: 'telegram', label: 'Telegram', icon: 'i-mdi-telegram' },
-	{ value: 'whatsapp', label: 'WhatsApp', icon: 'i-mdi-whatsapp' },
-	{ value: 'reddit', label: 'Reddit', icon: 'i-mdi-reddit' },
-	{ value: 'twitch', label: 'Twitch', icon: 'i-mdi-twitch' },
-	{ value: 'spotify', label: 'Spotify', icon: 'i-mdi-spotify' },
-	{ value: 'soundcloud', label: 'SoundCloud', icon: 'i-mdi-soundcloud' },
-	{ value: 'vimeo', label: 'Vimeo', icon: 'i-mdi-vimeo' },
-	{ value: 'other', label: 'Other Link', icon: 'i-mdi-link-variant' },
+// Platform options for dropdown - Define as a regular array for easier template usage
+const platformOptions = [
+	{
+		value: 'instagram' as PlatformKey,
+		label: 'Instagram',
+		icon: 'i-mdi-instagram',
+	},
+	{
+		value: 'twitter' as PlatformKey,
+		label: 'Twitter/X',
+		icon: 'i-mdi-twitter',
+	},
+	{
+		value: 'facebook' as PlatformKey,
+		label: 'Facebook',
+		icon: 'i-mdi-facebook',
+	},
+	{
+		value: 'linkedin' as PlatformKey,
+		label: 'LinkedIn',
+		icon: 'i-mdi-linkedin',
+	},
+	{ value: 'youtube' as PlatformKey, label: 'YouTube', icon: 'i-mdi-youtube' },
+	{ value: 'tiktok' as PlatformKey, label: 'TikTok', icon: 'i-mdi-music-note' },
+	{
+		value: 'snapchat' as PlatformKey,
+		label: 'Snapchat',
+		icon: 'i-mdi-snapchat',
+	},
+	{
+		value: 'pinterest' as PlatformKey,
+		label: 'Pinterest',
+		icon: 'i-mdi-pinterest',
+	},
+	{ value: 'github' as PlatformKey, label: 'GitHub', icon: 'i-mdi-github' },
+	{
+		value: 'dribbble' as PlatformKey,
+		label: 'Dribbble',
+		icon: 'i-mdi-dribbble',
+	},
+	{ value: 'behance' as PlatformKey, label: 'Behance', icon: 'i-mdi-behance' },
+	{ value: 'medium' as PlatformKey, label: 'Medium', icon: 'i-mdi-medium' },
+	{ value: 'discord' as PlatformKey, label: 'Discord', icon: 'i-mdi-discord' },
+	{ value: 'slack' as PlatformKey, label: 'Slack', icon: 'i-mdi-slack' },
+	{
+		value: 'telegram' as PlatformKey,
+		label: 'Telegram',
+		icon: 'i-mdi-telegram',
+	},
+	{
+		value: 'whatsapp' as PlatformKey,
+		label: 'WhatsApp',
+		icon: 'i-mdi-whatsapp',
+	},
+	{ value: 'reddit' as PlatformKey, label: 'Reddit', icon: 'i-mdi-reddit' },
+	{ value: 'twitch' as PlatformKey, label: 'Twitch', icon: 'i-mdi-twitch' },
+	{ value: 'spotify' as PlatformKey, label: 'Spotify', icon: 'i-mdi-spotify' },
+	{
+		value: 'soundcloud' as PlatformKey,
+		label: 'SoundCloud',
+		icon: 'i-mdi-soundcloud',
+	},
+	{ value: 'vimeo' as PlatformKey, label: 'Vimeo', icon: 'i-mdi-vimeo' },
+	{
+		value: 'other' as PlatformKey,
+		label: 'Other Link',
+		icon: 'i-mdi-link-variant',
+	},
 ]
 
-// Platform colors for styling
-const platformColors: Record<string, PlatformColors> = {
+// Define type-safe color mapping
+const platformColors: Record<PlatformKey, PlatformColors> = {
 	instagram: {
 		bg: 'bg-pink-50',
 		text: 'text-pink-600',
@@ -266,6 +276,104 @@ const platformColors: Record<string, PlatformColors> = {
 	},
 }
 
+// Helper to safely get platform colors with fallback
+function getPlatformColor(
+	platform: string | PlatformKey,
+	type: keyof PlatformColors,
+): string {
+	if (platform in platformColors) {
+		return platformColors[platform as PlatformKey][type]
+	}
+	return platformColors.other[type]
+}
+
+// Handle image upload - Make sure functions don't get serialized
+function onImageSelected(event: Event): void {
+	const target = event.target as HTMLInputElement
+	const file = target.files?.[0]
+
+	if (file) {
+		// Validate file size (max 5MB)
+		if (file.size > 5 * 1024 * 1024) {
+			toast.add({
+				title: 'File too large',
+				description: 'Profile image must be less than 5MB',
+				color: 'error',
+			})
+			return
+		}
+
+		// Validate file type
+		if (
+			!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(
+				file.type,
+			)
+		) {
+			toast.add({
+				title: 'Invalid file type',
+				description: 'Please upload a JPG, PNG, GIF or WEBP image',
+				color: 'error',
+			})
+			return
+		}
+
+		// Create object URL and clean up previous one if exists
+		if (userData.profileImage && userData.profileImage.startsWith('blob:')) {
+			URL.revokeObjectURL(userData.profileImage)
+		}
+
+		userData.profileImage = URL.createObjectURL(file)
+	}
+}
+
+// Handle drag and drop for image
+function onDragOver(event: DragEvent): void {
+	event.preventDefault()
+	isDragging.value = true
+}
+
+function onDragLeave(): void {
+	isDragging.value = false
+}
+
+function onDrop(event: DragEvent): void {
+	event.preventDefault()
+	isDragging.value = false
+
+	const files = event.dataTransfer?.files
+	if (files && files.length > 0) {
+		const fileInput = document.createElement('input')
+		fileInput.type = 'file'
+		fileInput.files = files
+		onImageSelected({ target: fileInput } as unknown as Event)
+	}
+}
+
+// Remove profile image
+function removeProfileImage(): void {
+	if (userData.profileImage && userData.profileImage.startsWith('blob:')) {
+		URL.revokeObjectURL(userData.profileImage)
+	}
+	userData.profileImage = null
+}
+
+// Add a new social media link
+function addSocialLink(): void {
+	userData.socials.push({
+		platform: 'other',
+		url: '',
+		icon: 'i-mdi-link-variant',
+	})
+	// Also add a corresponding error slot
+	formErrors.socials.push('')
+}
+
+// Remove a social media link
+function removeSocialLink(index: number): void {
+	userData.socials.splice(index, 1)
+	formErrors.socials.splice(index, 1)
+}
+
 // Generate platform icon based on URL or set manual selection
 function detectPlatform(url: string, index: number): void {
 	// Only auto-detect if URL changes
@@ -341,7 +449,7 @@ function detectPlatform(url: string, index: number): void {
 }
 
 // Manually set platform
-function setPlatform(platform: string, index: number): void {
+function setPlatform(platform: string | null, index: number): void {
 	if (!platform) return
 
 	userData.socials[index].platform = platform
@@ -392,31 +500,8 @@ function validateForm(): boolean {
 	return isValid
 }
 
-// URL validation helper
-function isValidUrl(url: string): boolean {
-	try {
-		// Add protocol if missing
-		if (!url.startsWith('http://') && !url.startsWith('https://')) {
-			url = 'https://' + url
-		}
-		new URL(url)
-		return true
-	} catch {
-		return false
-	}
-}
-
-// Format URL (ensure it has protocol)
-function formatUrl(url: string): string {
-	if (!url) return ''
-	if (!url.startsWith('http://') && !url.startsWith('https://')) {
-		return 'https://' + url
-	}
-	return url
-}
-
-// Save profile
-async function saveProfile(): Promise<void> {
+// Save profile - Make async function SSR-safe
+const saveProfile = async (): Promise<void> => {
 	if (!validateForm()) {
 		toast.add({
 			title: 'Validation Error',
@@ -449,6 +534,12 @@ async function saveProfile(): Promise<void> {
 		isLoading.value = false
 	}
 }
+
+// Configure SSR properly - use client-side only for this component
+definePageMeta({
+	// Set to false to prevent SSR issues with client-specific functionality
+	ssr: false,
+})
 </script>
 
 <template>
@@ -535,15 +626,9 @@ async function saveProfile(): Promise<void> {
 													href="#"
 													class="block w-full rounded-lg shadow-sm p-3.5 flex items-center justify-center gap-2.5 transition-all duration-200"
 													:class="[
-														social.platform
-															? platformColors[social.platform]?.bg
-															: platformColors.other.bg,
-														social.platform
-															? platformColors[social.platform]?.text
-															: platformColors.other.text,
-														social.platform
-															? platformColors[social.platform]?.hover
-															: platformColors.other.hover,
+														getPlatformColor(social.platform, 'bg'),
+														getPlatformColor(social.platform, 'text'),
+														getPlatformColor(social.platform, 'hover'),
 													]"
 												>
 													<UIcon :name="social.icon" class="text-xl" />
@@ -767,11 +852,7 @@ async function saveProfile(): Promise<void> {
 											<UIcon
 												:name="social.icon"
 												class="text-lg"
-												:class="
-													social.platform
-														? platformColors[social.platform]?.text
-														: 'text-gray-600'
-												"
+												:class="getPlatformColor(social.platform, 'text')"
 											/>
 											<span class="font-medium">Link #{{ index + 1 }}</span>
 										</span>
@@ -787,7 +868,7 @@ async function saveProfile(): Promise<void> {
 									<!-- Platform select -->
 									<UFormGroup label="Platform" class="mb-3">
 										<USelectMenu
-											v-model="social.platform"
+											v-model="userData.socials[index].platform"
 											:items="platformOptions"
 											:icon="
 												social.platform
@@ -799,12 +880,15 @@ async function saveProfile(): Promise<void> {
 											class="w-full"
 											placeholder="Select platform"
 											value-attribute="value"
-											@update:model-value="setPlatform($event, index)"
+											@update:model-value="val => setPlatform(val, index)"
 										>
 											<template #item="{ item }">
-												<div class="flex items-center gap-2">
-													<UIcon :name="item.icon" class="flex-shrink-0" />
-													<span>{{ item.label }}</span>
+												<div v-if="item" class="flex items-center gap-2">
+													<UIcon
+														:name="item.icon || ''"
+														class="flex-shrink-0"
+													/>
+													<span>{{ item.label || '' }}</span>
 												</div>
 											</template>
 										</USelectMenu>
