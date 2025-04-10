@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { validateProfile } from '@/validation/profileSchema'
+import { profileSchema, validateProfile } from '@/validation/profileSchema'
 import type { FormSubmitEvent } from '@nuxt/ui'
+
+// -----------------------------
+// Reactive State
+// -----------------------------
+
 // Create reactive form state
 const state = reactive<UserData>({
 	name: '',
@@ -13,7 +18,35 @@ const state = reactive<UserData>({
 const errors = ref<any[]>([])
 const fieldsToValidate = ref<Set<string>>(new Set())
 
-// Field-level validation
+// File upload state
+const fileInput = ref<HTMLInputElement | null>(null)
+const isDragging = ref(false)
+const isLoading = ref(false)
+
+// Get platform detection and toast
+const { detectPlatform } = useSocialPlatforms()
+const toast = useToast()
+
+// -----------------------------
+// Computed Properties
+// -----------------------------
+
+// Check if form is valid using Zod schema directly
+const isFormValid = computed(() => {
+	try {
+		// Directly use profileSchema to validate the entire form
+		profileSchema.parse(state)
+		return true
+	} catch (error) {
+		return false
+	}
+})
+
+// -----------------------------
+// Methods
+// -----------------------------
+
+// Validation Methods
 const validateField = (fieldName: string) => {
 	if (fieldName.startsWith('socials.')) {
 		// For social URL fields, add to validation set
@@ -34,21 +67,11 @@ const validateField = (fieldName: string) => {
 	)
 }
 
-// Legacy full validation method (still needed for form submission)
 const validateState = () => {
 	errors.value = validateProfile(state)
 }
 
-// File upload state
-const fileInput = ref<HTMLInputElement | null>(null)
-const isDragging = ref(false)
-const isLoading = ref(false)
-
-// Platform detection
-const { detectPlatform } = useSocialPlatforms()
-const toast = useToast()
-
-// Handle image upload
+// Image Handling Methods
 function onImageSelected(event: Event): void {
 	const target = event.target as HTMLInputElement
 	const file = target.files?.[0]
@@ -87,7 +110,6 @@ function onImageSelected(event: Event): void {
 	}
 }
 
-// Handle drag and drop for image
 function onDragOver(event: DragEvent): void {
 	event.preventDefault()
 	isDragging.value = true
@@ -110,7 +132,6 @@ function onDrop(event: DragEvent): void {
 	}
 }
 
-// Remove profile image
 function removeProfileImage(): void {
 	if (state.profileImage && state.profileImage.startsWith('blob:')) {
 		URL.revokeObjectURL(state.profileImage)
@@ -118,7 +139,7 @@ function removeProfileImage(): void {
 	state.profileImage = null
 }
 
-// Add a new social media link
+// Social Links Methods
 function addSocialLink(): void {
 	state.socials.push({
 		platform: 'other',
@@ -129,14 +150,12 @@ function addSocialLink(): void {
 	validateField('socials')
 }
 
-// Remove a social media link
 function removeSocialLink(index: number): void {
 	state.socials.splice(index, 1)
 	// Validate socials array after removing a link
 	validateField('socials')
 }
 
-// Update platform when URL changes
 function handleUrlChange(url: string, index: number): void {
 	// Validate the field
 	validateField(`socials.${index}.url`)
@@ -464,7 +483,7 @@ defineExpose({ userData: state })
 					color="primary"
 					size="lg"
 					:loading="isLoading"
-					:disabled="isLoading || errors.length > 0"
+					:disabled="isLoading || !isFormValid"
 				>
 					<UIcon name="i-mdi-check" class="mr-1" />
 					Save Profile

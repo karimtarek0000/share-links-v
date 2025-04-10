@@ -2,10 +2,14 @@ import { z } from 'zod'
 
 // Define the profile validation schema with Zod
 export const profileSchema = z.object({
-	name: z.string().min(1, 'Name is required'),
+	name: z
+		.string()
+		.min(1, 'Name is required')
+		.min(5, 'Name must be at least 5 characters'),
 	bio: z
 		.string()
 		.min(1, 'Bio is required')
+		.min(10, 'Bio must be at least 10 characters')
 		.max(150, 'Bio must be 150 characters or less'),
 	profileImage: z.string().nullable(),
 	socials: z
@@ -30,28 +34,6 @@ export const profileSchema = z.object({
 		)
 		.min(1, 'At least one social link is required'),
 })
-
-// Helper function for URL validation
-export const isValidUrl = (url: string): boolean => {
-	try {
-		// Handle empty strings
-		if (!url.trim()) return false
-
-		// Add protocol if missing
-		const urlToCheck =
-			!url.startsWith('http://') && !url.startsWith('https://')
-				? 'https://' + url
-				: url
-
-		// Create URL object to validate format
-		const urlObj = new URL(urlToCheck)
-
-		// Ensure URL has a valid domain with at least one dot
-		return urlObj.hostname.includes('.') && urlObj.hostname.length > 3
-	} catch {
-		return false
-	}
-}
 
 // Type for validation errors
 export type ValidationError = {
