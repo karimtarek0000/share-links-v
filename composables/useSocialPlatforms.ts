@@ -1,3 +1,9 @@
+// Define a strategy interface for platform detection
+interface PlatformDetectionStrategy {
+	canHandle(url: string): boolean
+	getPlatformDetails(): { platform: PlatformKey; icon: string }
+}
+
 export function useSocialPlatforms() {
 	// Platform options for dropdown - Define as a regular array for easier template usage
 	const platformOptions: PlatformOption[] = [
@@ -203,84 +209,232 @@ export function useSocialPlatforms() {
 		},
 	}
 
+	// Creating the platform detection strategies using a factory pattern
+	const createPlatformStrategies = (): Record<
+		PlatformKey,
+		PlatformDetectionStrategy
+	> => {
+		const createStrategy = (
+			platform: PlatformKey,
+			patterns: string[],
+		): PlatformDetectionStrategy => ({
+			canHandle: (url: string): boolean => {
+				if (!url) return false
+				const lowerUrl = url.toLowerCase()
+				return patterns.some(pattern => lowerUrl.includes(pattern))
+			},
+			getPlatformDetails: (): { platform: PlatformKey; icon: string } => {
+				const platformInfo = platformOptions.find(p => p.value === platform)
+				return {
+					platform,
+					icon: platformInfo?.icon || 'i-mdi-link-variant',
+				}
+			},
+		})
+
+		// Strategy instances for each platform
+		return {
+			instagram: createStrategy('instagram', ['instagram.com', 'instagr.am']),
+			twitter: createStrategy('twitter', ['twitter.com', 'x.com', 't.co']),
+			facebook: createStrategy('facebook', ['facebook.com', 'fb.com', 'fb.me']),
+			linkedin: createStrategy('linkedin', ['linkedin.com', 'lnkd.in']),
+			youtube: createStrategy('youtube', [
+				'youtube.com',
+				'youtu.be',
+				'ytbe.com',
+			]),
+			tiktok: createStrategy('tiktok', ['tiktok.com', 'vm.tiktok']),
+			snapchat: createStrategy('snapchat', ['snapchat.com', 'snap.com']),
+			pinterest: createStrategy('pinterest', ['pinterest.com', 'pin.it']),
+			github: createStrategy('github', ['github.com', 'github.io']),
+			dribbble: createStrategy('dribbble', ['dribbble.com']),
+			behance: createStrategy('behance', ['behance.net', 'be.net']),
+			medium: createStrategy('medium', ['medium.com']),
+			discord: createStrategy('discord', ['discord.com', 'discord.gg']),
+			slack: createStrategy('slack', ['slack.com']),
+			telegram: createStrategy('telegram', [
+				'telegram.me',
+				't.me',
+				'telegram.org',
+			]),
+			whatsapp: createStrategy('whatsapp', ['whatsapp.com', 'wa.me']),
+			reddit: createStrategy('reddit', ['reddit.com', 'redd.it']),
+			twitch: createStrategy('twitch', ['twitch.tv']),
+			spotify: createStrategy('spotify', [
+				'spotify.com',
+				'open.spotify.com',
+				'spoti.fi',
+			]),
+			soundcloud: createStrategy('soundcloud', ['soundcloud.com', 'snd.sc']),
+			vimeo: createStrategy('vimeo', ['vimeo.com', 'player.vimeo']),
+			other: createStrategy('other', []),
+		}
+	}
+
+	// Initialize strategies
+	const platformStrategies = createPlatformStrategies()
+
+	// Cache for previous URL detections to improve performance
+	const detectionCache = new Map<
+		string,
+		{ platform: PlatformKey; icon: string }
+	>()
+
 	// Helper to safely get platform colors with fallback
 	function getPlatformColor(
 		platform: string | PlatformKey,
 		type: keyof PlatformColors,
 	): string {
-		if (platform in platformColors) {
-			return platformColors[platform as PlatformKey][type]
+		try {
+			if (platform in platformColors) {
+				return platformColors[platform as PlatformKey][type]
+			}
+			return platformColors.other[type]
+		} catch (error) {
+			console.error('Error retrieving platform color:', error)
+			// Fallback colors if something goes wrong
+			const fallbacks = {
+				bg: 'bg-gray-100',
+				text: 'text-gray-800',
+				hover: 'hover:bg-gray-200',
+			}
+			return fallbacks[type] || fallbacks.bg
 		}
-		return platformColors.other[type]
 	}
 
 	// Get platform icon for display in select menu
 	function getPlatformIcon(platform: string): string {
 		if (!platform) return 'i-mdi-link-variant'
 
-		const platformInfo = platformOptions.find(p => p.value === platform)
-		return platformInfo?.icon || 'i-mdi-link-variant'
+		try {
+			const platformInfo = platformOptions.find(p => p.value === platform)
+			return platformInfo?.icon || 'i-mdi-link-variant'
+		} catch (error) {
+			console.error('Error retrieving platform icon:', error)
+			return 'i-mdi-link-variant'
+		}
 	}
 
-	// Detect platform from URL
+	/**
+	 * Detect platform from URL with performance optimization via memoization
+	 * @param url - The URL to detect the platform from
+	 * @returns Object containing the platform key and icon
+	 */
 	function detectPlatform(url: string): {
 		platform: PlatformKey
 		icon: string
 	} {
-		if (!url) return { platform: 'other', icon: 'i-mdi-link-variant' }
-
-		if (url.includes('instagram')) {
-			return { platform: 'instagram', icon: 'i-mdi-instagram' }
-		} else if (url.includes('twitter') || url.includes('x.com')) {
-			return { platform: 'twitter', icon: 'i-mdi-twitter' }
-		} else if (url.includes('facebook') || url.includes('fb.com')) {
-			return { platform: 'facebook', icon: 'i-mdi-facebook' }
-		} else if (url.includes('linkedin')) {
-			return { platform: 'linkedin', icon: 'i-mdi-linkedin' }
-		} else if (url.includes('youtube') || url.includes('youtu.be')) {
-			return { platform: 'youtube', icon: 'i-mdi-youtube' }
-		} else if (url.includes('tiktok')) {
-			return { platform: 'tiktok', icon: 'i-mdi-music-note' }
-		} else if (url.includes('snapchat')) {
-			return { platform: 'snapchat', icon: 'i-mdi-snapchat' }
-		} else if (url.includes('pinterest')) {
-			return { platform: 'pinterest', icon: 'i-mdi-pinterest' }
-		} else if (url.includes('github')) {
-			return { platform: 'github', icon: 'i-mdi-github' }
-		} else if (url.includes('dribbble')) {
-			return { platform: 'dribbble', icon: 'i-mdi-dribbble' }
-		} else if (url.includes('behance')) {
-			return { platform: 'behance', icon: 'i-mdi-behance' }
-		} else if (url.includes('medium')) {
-			return { platform: 'medium', icon: 'i-mdi-medium' }
-		} else if (url.includes('discord')) {
-			return { platform: 'discord', icon: 'i-mdi-discord' }
-		} else if (url.includes('slack')) {
-			return { platform: 'slack', icon: 'i-mdi-slack' }
-		} else if (url.includes('telegram')) {
-			return { platform: 'telegram', icon: 'i-mdi-telegram' }
-		} else if (url.includes('whatsapp')) {
-			return { platform: 'whatsapp', icon: 'i-mdi-whatsapp' }
-		} else if (url.includes('reddit')) {
-			return { platform: 'reddit', icon: 'i-mdi-reddit' }
-		} else if (url.includes('twitch')) {
-			return { platform: 'twitch', icon: 'i-mdi-twitch' }
-		} else if (url.includes('spotify')) {
-			return { platform: 'spotify', icon: 'i-mdi-spotify' }
-		} else if (url.includes('soundcloud')) {
-			return { platform: 'soundcloud', icon: 'i-mdi-soundcloud' }
-		} else if (url.includes('vimeo')) {
-			return { platform: 'vimeo', icon: 'i-mdi-vimeo' }
+		// Handle empty URLs safely
+		if (!url?.trim()) {
+			return { platform: 'other', icon: 'i-mdi-link-variant' }
 		}
 
-		return { platform: 'other', icon: 'i-mdi-link-variant' }
+		try {
+			// Normalize the URL for consistent caching
+			const normalizedUrl = url.trim().toLowerCase()
+
+			// Check cache first for performance
+			if (detectionCache.has(normalizedUrl)) {
+				return detectionCache.get(normalizedUrl)!
+			}
+
+			// Pre-process URL to ensure proper format for detection
+			let processedUrl = normalizedUrl
+			if (
+				!processedUrl.startsWith('http://') &&
+				!processedUrl.startsWith('https://')
+			) {
+				processedUrl = 'https://' + processedUrl
+			}
+
+			// Try to extract the domain for more accurate detection
+			let domain = ''
+			try {
+				const urlObj = new URL(processedUrl)
+				domain = urlObj.hostname
+			} catch {
+				domain = processedUrl
+			}
+
+			// Find the first strategy that can handle this URL
+			for (const [platform, strategy] of Object.entries(platformStrategies)) {
+				if (strategy.canHandle(domain)) {
+					const result = strategy.getPlatformDetails()
+					// Cache the result for future lookups
+					detectionCache.set(normalizedUrl, result)
+					return result
+				}
+			}
+
+			// If no strategy matched, return other
+			const defaultResult = {
+				platform: 'other' as PlatformKey,
+				icon: 'i-mdi-link-variant',
+			}
+			detectionCache.set(normalizedUrl, defaultResult)
+			return defaultResult
+		} catch (error) {
+			console.error('Error detecting platform:', error)
+			return { platform: 'other', icon: 'i-mdi-link-variant' }
+		}
 	}
 
+	/**
+	 * Extracts username from a social media URL if possible
+	 * @param url - The social media URL
+	 * @param platform - The detected platform
+	 * @returns The username or null if not extractable
+	 */
+	function extractUsername(url: string, platform: PlatformKey): string | null {
+		if (!url) return null
+
+		try {
+			// Normalize URL
+			if (!url.startsWith('http://') && !url.startsWith('https://')) {
+				url = 'https://' + url
+			}
+
+			const urlObj = new URL(url)
+			const path = urlObj.pathname.split('/').filter(Boolean)
+
+			// Platform-specific extraction logic
+			switch (platform) {
+				case 'twitter':
+					return path[0] !== 'hashtag' && path[0] !== 'search'
+						? `@${path[0]}`
+						: null
+				case 'instagram':
+				case 'github':
+				case 'pinterest':
+					return path[0] ? `@${path[0]}` : null
+				case 'facebook':
+					return path[0] && !['pages', 'groups'].includes(path[0])
+						? path[0]
+						: null
+				default:
+					return null
+			}
+		} catch {
+			return null
+		}
+	}
+
+	/**
+	 * Get all supported platforms
+	 * @returns Array of platform keys
+	 */
+	function getSupportedPlatforms(): PlatformKey[] {
+		return Object.keys(platformStrategies) as PlatformKey[]
+	}
+
+	// Public API
 	return {
 		platformOptions,
 		platformColors,
 		getPlatformColor,
 		getPlatformIcon,
 		detectPlatform,
+		extractUsername,
+		getSupportedPlatforms,
 	}
 }

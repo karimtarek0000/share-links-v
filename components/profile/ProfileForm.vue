@@ -24,8 +24,11 @@ const isDragging = ref(false)
 const isLoading = ref(false)
 
 // Get platform detection and toast
-const { detectPlatform } = useSocialPlatforms()
+const { detectPlatform, extractUsername } = useSocialPlatforms()
 const toast = useToast()
+
+// Store extracted usernames
+const extractedUsernames = ref<Record<number, string | null>>({})
 
 // -----------------------------
 // Computed Properties
@@ -152,6 +155,8 @@ function addSocialLink(): void {
 
 function removeSocialLink(index: number): void {
 	state.socials.splice(index, 1)
+	// Remove extracted username for this index
+	delete extractedUsernames.value[index]
 	// Validate socials array after removing a link
 	validateField('socials')
 }
@@ -161,10 +166,17 @@ function handleUrlChange(url: string, index: number): void {
 	validateField(`socials.${index}.url`)
 
 	// Update platform detection
-	if (!url) return
+	if (!url) {
+		extractedUsernames.value[index] = null
+		return
+	}
+
 	const { platform, icon } = detectPlatform(url)
 	state.socials[index].platform = platform
 	state.socials[index].icon = icon
+
+	// Extract username if possible
+	extractedUsernames.value[index] = extractUsername(url, platform)
 }
 
 // Form submission handler
@@ -432,6 +444,12 @@ defineExpose({ userData: state })
 								<span class="font-medium capitalize">{{
 									social.platform
 								}}</span>
+								<span
+									v-if="extractedUsernames[index]"
+									class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full"
+								>
+									{{ extractedUsernames[index] }}
+								</span>
 							</span>
 							<UButton
 								color="error"
