@@ -198,11 +198,11 @@ async function onSubmit(event: FormSubmitEvent<UserData>) {
 	try {
 		// Simulate API call
 		await new Promise(resolve => setTimeout(resolve, 1000))
-
 		toast.add({
 			title: 'Success!',
 			description: 'Your profile has been saved',
 			color: 'success',
+			icon: 'i-mdi-check',
 		})
 
 		// Here you would actually save the data to your backend
