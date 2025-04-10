@@ -241,74 +241,70 @@ defineExpose({ userData: state })
 
 			<!-- Profile Image Upload -->
 			<div class="mb-6">
-				<UFormGroup label="Profile Image">
-					<div
-						class="p-6 border-2 border-dashed rounded-xl flex flex-col items-center justify-center"
-						:class="
-							isDragging ? 'border-primary bg-primary/5' : 'border-gray-300'
-						"
-						@dragover="onDragOver"
-						@dragleave="onDragLeave"
-						@drop="onDrop"
-					>
-						<div class="flex items-center space-x-4">
+				<div
+					class="p-6 border-2 border-dashed rounded-xl flex flex-col items-center justify-center"
+					:class="
+						isDragging ? 'border-primary bg-primary/5' : 'border-gray-300'
+					"
+					@dragover="onDragOver"
+					@dragleave="onDragLeave"
+					@drop="onDrop"
+				>
+					<div class="flex items-center space-x-4">
+						<div
+							class="w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border relative group"
+							:class="state.profileImage ? 'border-primary' : 'border-gray-300'"
+						>
+							<img
+								v-if="state.profileImage"
+								:src="state.profileImage"
+								class="w-full h-full object-cover"
+								alt="Profile"
+							/>
+							<UIcon
+								v-else
+								name="i-mdi-account"
+								class="text-gray-400 text-3xl"
+							/>
+
+							<!-- Hover overlay -->
 							<div
-								class="w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border relative group"
-								:class="
-									state.profileImage ? 'border-primary' : 'border-gray-300'
-								"
+								v-if="state.profileImage"
+								class="absolute inset-0 bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+								@click="removeProfileImage"
 							>
-								<img
-									v-if="state.profileImage"
-									:src="state.profileImage"
-									class="w-full h-full object-cover"
-									alt="Profile"
-								/>
-								<UIcon
-									v-else
-									name="i-mdi-account"
-									class="text-gray-400 text-3xl"
-								/>
-
-								<!-- Hover overlay -->
-								<div
-									v-if="state.profileImage"
-									class="absolute inset-0 bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-									@click="removeProfileImage"
-								>
-									<UIcon name="i-mdi-trash" class="text-white text-xl" />
-								</div>
-							</div>
-
-							<div class="space-y-2">
-								<UButton
-									color="primary"
-									variant="soft"
-									icon="i-mdi-upload"
-									@click="fileInput?.click()"
-								>
-									Upload Image
-								</UButton>
-								<p class="text-xs text-gray-500">
-									JPG, PNG, GIF or WEBP (max 5MB)
-								</p>
+								<UIcon name="i-mdi-trash" class="text-white text-xl" />
 							</div>
 						</div>
 
-						<input
-							ref="fileInput"
-							type="file"
-							hidden
-							accept="image/jpeg,image/png,image/gif,image/webp"
-							@change="onImageSelected"
-						/>
-
-						<p class="text-sm text-gray-500 mt-4">
-							<UIcon name="i-mdi-information-outline" class="inline mr-1" />
-							Drag and drop an image here, or click to browse
-						</p>
+						<div class="space-y-2">
+							<UButton
+								color="primary"
+								variant="soft"
+								icon="i-mdi-upload"
+								@click="fileInput?.click()"
+							>
+								Upload Image
+							</UButton>
+							<p class="text-xs text-gray-500">
+								JPG, PNG, GIF or WEBP (max 5MB)
+							</p>
+						</div>
 					</div>
-				</UFormGroup>
+
+					<input
+						ref="fileInput"
+						type="file"
+						hidden
+						accept="image/jpeg,image/png,image/gif,image/webp"
+						@change="onImageSelected"
+					/>
+
+					<p class="text-sm text-gray-500 mt-4">
+						<UIcon name="i-mdi-information-outline" class="inline mr-1" />
+						Drag and drop an image here, or click to browse
+					</p>
+				</div>
 			</div>
 
 			<!-- Name Input -->
