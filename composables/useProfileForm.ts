@@ -147,13 +147,14 @@ export function useProfileForm() {
 		if (!platform) return
 
 		const { getPlatformIcon } = useSocialPlatforms()
-		userData.socials[index].platform = platform
+		userData.socials[index].platform = platform as PlatformKey
 		userData.socials[index].icon = getPlatformIcon(platform)
 	}
 
 	// Validate form
 	function validateForm(): boolean {
 		let isValid = true
+		let message = ''
 
 		// Validate name
 		if (!userData.name.trim()) {

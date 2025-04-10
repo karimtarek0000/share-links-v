@@ -103,6 +103,7 @@ defineExpose({ userData })
 			</UFormGroup>
 		</div>
 
+		<!-- TODO: Start -->
 		<!-- Name Input -->
 		<div class="mb-6">
 			<UFormGroup label="Display Name" :error="formErrors.name || undefined">
@@ -138,6 +139,8 @@ defineExpose({ userData })
 				</div>
 			</UFormGroup>
 		</div>
+
+		<!-- TODO: end -->
 
 		<!-- Social Links Section -->
 		<div>
