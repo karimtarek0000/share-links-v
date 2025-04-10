@@ -2,37 +2,12 @@ import { reactive, ref } from 'vue'
 import { useSocialPlatforms } from './useSocialPlatforms'
 
 export function useProfileForm() {
-	// URL validation helper
-	function isValidUrl(url: string): boolean {
-		try {
-			// Add protocol if missing
-			if (!url.startsWith('http://') && !url.startsWith('https://')) {
-				url = 'https://' + url
-			}
-			new URL(url)
-			return true
-		} catch {
-			return false
-		}
-	}
-
-	const { detectPlatform } = useSocialPlatforms()
-	const toast = useToast()
-
 	// Define reactive state for form data
-	const userData = reactive({
+	const userData = reactive<UserData>({
 		name: '',
 		bio: '',
-		profileImage: '' as string | null,
-		socials: [
-			{
-				platform: 'instagram' as PlatformKey,
-				url: '',
-				icon: 'i-mdi-instagram',
-			},
-			{ platform: 'twitter' as PlatformKey, url: '', icon: 'i-mdi-twitter' },
-			{ platform: 'linkedin' as PlatformKey, url: '', icon: 'i-mdi-linkedin' },
-		] as Array<{ platform: PlatformKey | string; url: string; icon: string }>,
+		profileImage: '',
+		socials: [],
 	})
 
 	// Form validation state
@@ -41,6 +16,31 @@ export function useProfileForm() {
 		bio: '',
 		socials: [] as string[],
 	})
+
+	// URL validation helper
+	function isValidUrl(url: string): boolean {
+		try {
+			// Handle empty strings
+			if (!url.trim()) return false
+
+			// Add protocol if missing
+			const urlToCheck =
+				!url.startsWith('http://') && !url.startsWith('https://')
+					? 'https://' + url
+					: url
+
+			// Create URL object to validate format
+			const urlObj = new URL(urlToCheck)
+
+			// Ensure URL has a valid domain with at least one dot
+			return urlObj.hostname.includes('.') && urlObj.hostname.length > 3
+		} catch {
+			return false
+		}
+	}
+
+	const { detectPlatform } = useSocialPlatforms()
+	const toast = useToast()
 
 	// File upload state
 	const fileInput = ref<HTMLInputElement | null>(null)

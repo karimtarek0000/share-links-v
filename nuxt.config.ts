@@ -7,5 +7,6 @@ export default defineNuxtConfig({
 	ui: {
 		global: true,
 		icons: ['heroicons', 'simple-icons'],
+		colorMode: false,
 	},
 })

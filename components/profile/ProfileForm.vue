@@ -13,11 +13,8 @@ const {
 	addSocialLink,
 	removeSocialLink,
 	updatePlatformFromUrl,
-	setPlatform,
 	saveProfile,
 } = useProfileForm()
-
-const { platformOptions, getPlatformIcon } = useSocialPlatforms()
 
 // Make userData available to parent components
 defineExpose({ userData })
@@ -205,32 +202,6 @@ defineExpose({ userData })
 						/>
 					</div>
 
-					<!-- Platform select -->
-					<UFormGroup label="Platform" class="mb-3">
-						<USelectMenu
-							v-model="userData.socials[index].platform"
-							:items="platformOptions"
-							:icon="
-								social.platform
-									? getPlatformIcon(social.platform)
-									: 'i-mdi-link-variant'
-							"
-							color="primary"
-							variant="outline"
-							class="w-full"
-							placeholder="Select platform"
-							value-attribute="value"
-							@update:model-value="val => setPlatform(val, index)"
-						>
-							<template #item="{ item }">
-								<div v-if="item" class="flex items-center gap-2">
-									<UIcon :name="item.icon || ''" class="flex-shrink-0" />
-									<span>{{ item.label || '' }}</span>
-								</div>
-							</template>
-						</USelectMenu>
-					</UFormGroup>
-
 					<!-- Link input -->
 					<UFormGroup
 						label="Link"
@@ -244,6 +215,7 @@ defineExpose({ userData })
 									: 'https://example.com/your-profile'
 							"
 							icon="i-mdi-link-variant"
+							class="w-full"
 							@update:model-value="updatePlatformFromUrl(social.url, index)"
 						/>
 					</UFormGroup>

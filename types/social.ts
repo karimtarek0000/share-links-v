@@ -3,9 +3,16 @@ export {} // Ensure this file is treated as a module
 
 declare global {
 	interface SocialLink {
-		platform: string
+		platform: PlatformKey
 		url: string
 		icon: string
+	}
+
+	interface UserData {
+		name: string
+		bio: string
+		profileImage: string | null
+		socials: SocialLink[]
 	}
 
 	interface PlatformColors {
