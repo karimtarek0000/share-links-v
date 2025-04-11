@@ -80,33 +80,40 @@ const handleSubmit = async (event: any) => {
 				</p>
 			</div>
 
-			<UForm :state="formState" @submit="handleSubmit" class="space-y-5">
+			<UForm :state="formState" @submit="handleSubmit" class="space-y-6">
 				<!-- Name field -->
-				<UFormGroup label="Full Name" name="name">
+				<UFormField label="Full Name" name="name">
 					<UInput
+						class="w-full"
 						v-model="formState.name"
 						type="text"
 						placeholder="John Doe"
 						size="lg"
 						autocomplete="name"
+						@blur="formState.name = formState.name.trim()"
 					/>
-				</UFormGroup>
+				</UFormField>
 
 				<!-- Email field -->
-				<UFormGroup label="Email" name="email">
+				<UFormField label="Email" name="email">
 					<UInput
+						class="w-full"
 						v-model="formState.email"
 						type="email"
 						placeholder="your@email.com"
 						size="lg"
 						autocomplete="email"
-						:color="
+						:status="
 							isValidEmail === false
-								? 'red'
+								? 'error'
 								: isValidEmail
-								? 'green'
+								? 'success'
 								: undefined
 						"
+						:hint="
+							isValidEmail === false ? 'Please enter a valid email address' : ''
+						"
+						@blur="formState.email = formState.email.trim()"
 					>
 						<template #trailing>
 							<UIcon
@@ -121,11 +128,12 @@ const handleSubmit = async (event: any) => {
 							/>
 						</template>
 					</UInput>
-				</UFormGroup>
+				</UFormField>
 
 				<!-- Password field -->
-				<UFormGroup label="Password" name="password">
+				<UFormField label="Password" name="password">
 					<UInput
+						class="w-full"
 						v-model="formState.password"
 						:type="showPassword ? 'text' : 'password'"
 						placeholder="••••••••"
@@ -135,7 +143,7 @@ const handleSubmit = async (event: any) => {
 						<template #trailing>
 							<button
 								type="button"
-								class="focus:outline-none"
+								class="focus:outline-none flex"
 								@click="showPassword = !showPassword"
 							>
 								<UIcon
@@ -147,23 +155,25 @@ const handleSubmit = async (event: any) => {
 							</button>
 						</template>
 					</UInput>
-				</UFormGroup>
+				</UFormField>
 
 				<!-- Confirm Password field -->
-				<UFormGroup label="Confirm Password" name="confirmPassword">
+				<UFormField label="Confirm Password" name="confirmPassword">
 					<UInput
+						class="w-full"
 						v-model="formState.confirmPassword"
 						:type="showConfirmPassword ? 'text' : 'password'"
 						placeholder="••••••••"
 						size="lg"
 						autocomplete="new-password"
-						:color="
+						:status="
 							passwordsMatch === false
-								? 'red'
+								? 'error'
 								: passwordsMatch
-								? 'green'
+								? 'success'
 								: undefined
 						"
+						:hint="passwordsMatch === false ? 'Passwords do not match' : ''"
 					>
 						<template #trailing>
 							<div class="flex items-center space-x-2">
@@ -179,7 +189,7 @@ const handleSubmit = async (event: any) => {
 								/>
 								<button
 									type="button"
-									class="focus:outline-none"
+									class="focus:outline-none flex"
 									@click="showConfirmPassword = !showConfirmPassword"
 								>
 									<UIcon
@@ -194,7 +204,7 @@ const handleSubmit = async (event: any) => {
 							</div>
 						</template>
 					</UInput>
-				</UFormGroup>
+				</UFormField>
 
 				<!-- Submit button -->
 				<UButton
@@ -203,7 +213,7 @@ const handleSubmit = async (event: any) => {
 					size="lg"
 					:loading="isSubmitting"
 					:disabled="!isValidEmail || !passwordsMatch"
-					class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-300 mt-8"
+					class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-300"
 				>
 					{{ isSubmitting ? 'Creating Account...' : 'Create Account' }}
 				</UButton>

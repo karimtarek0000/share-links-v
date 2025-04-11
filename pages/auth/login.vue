@@ -73,20 +73,25 @@ const handleSubmit = async (event: any) => {
 
 			<UForm :state="formState" @submit="handleSubmit" class="space-y-6">
 				<!-- Email field -->
-				<UFormGroup label="Email" name="email">
+				<UFormField label="Email" name="email">
 					<UInput
+						class="w-full"
 						v-model="formState.email"
 						type="email"
 						placeholder="your@email.com"
 						size="lg"
 						autocomplete="email"
-						:color="
+						:status="
 							isValidEmail === false
-								? 'red'
+								? 'error'
 								: isValidEmail
-								? 'green'
+								? 'success'
 								: undefined
 						"
+						:hint="
+							isValidEmail === false ? 'Please enter a valid email address' : ''
+						"
+						@blur="formState.email = formState.email.trim()"
 					>
 						<template #trailing>
 							<UIcon
@@ -101,11 +106,12 @@ const handleSubmit = async (event: any) => {
 							/>
 						</template>
 					</UInput>
-				</UFormGroup>
+				</UFormField>
 
 				<!-- Password field -->
-				<UFormGroup label="Password" name="password">
+				<UFormField label="Password" name="password">
 					<UInput
+						class="w-full"
 						v-model="formState.password"
 						:type="showPassword ? 'text' : 'password'"
 						placeholder="••••••••"
@@ -115,7 +121,7 @@ const handleSubmit = async (event: any) => {
 						<template #trailing>
 							<button
 								type="button"
-								class="focus:outline-none"
+								class="focus:outline-none flex"
 								@click="showPassword = !showPassword"
 							>
 								<UIcon
@@ -127,7 +133,7 @@ const handleSubmit = async (event: any) => {
 							</button>
 						</template>
 					</UInput>
-				</UFormGroup>
+				</UFormField>
 
 				<!-- Submit button -->
 				<UButton
