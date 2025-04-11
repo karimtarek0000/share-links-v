@@ -89,7 +89,8 @@ const handleSubmit = async (event: any) => {
 						type="text"
 						placeholder="John Doe"
 						size="lg"
-						autocomplete="name"
+						autocomplete="off"
+						autofocus
 						@blur="formState.name = formState.name.trim()"
 					/>
 				</UFormField>
@@ -102,7 +103,7 @@ const handleSubmit = async (event: any) => {
 						type="email"
 						placeholder="your@email.com"
 						size="lg"
-						autocomplete="email"
+						autocomplete="off"
 						:status="
 							isValidEmail === false
 								? 'error'
@@ -138,7 +139,7 @@ const handleSubmit = async (event: any) => {
 						:type="showPassword ? 'text' : 'password'"
 						placeholder="••••••••"
 						size="lg"
-						autocomplete="new-password"
+						autocomplete="off"
 					>
 						<template #trailing>
 							<button
@@ -165,7 +166,7 @@ const handleSubmit = async (event: any) => {
 						:type="showConfirmPassword ? 'text' : 'password'"
 						placeholder="••••••••"
 						size="lg"
-						autocomplete="new-password"
+						autocomplete="off"
 						:status="
 							passwordsMatch === false
 								? 'error'

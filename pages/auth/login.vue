@@ -80,7 +80,8 @@ const handleSubmit = async (event: any) => {
 						type="email"
 						placeholder="your@email.com"
 						size="lg"
-						autocomplete="email"
+						autocomplete="off"
+						autofocus
 						:status="
 							isValidEmail === false
 								? 'error'
@@ -116,7 +117,7 @@ const handleSubmit = async (event: any) => {
 						:type="showPassword ? 'text' : 'password'"
 						placeholder="••••••••"
 						size="lg"
-						autocomplete="current-password"
+						autocomplete="off"
 					>
 						<template #trailing>
 							<button
