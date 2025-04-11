@@ -18,59 +18,15 @@ const formState = reactive({
 	confirmPassword: '',
 })
 
-// Form validation
-const validationErrors = ref<{ name: string; message: string }[]>([])
-const fieldsToValidate = ref<Set<string>>(new Set())
+// Use form validation composable
+const { validateField, validateForm, getFieldError, isFormValid } =
+	useFormValidation(formState, validateSignup)
 
-// Handle field validation
-const validateField = (fieldName: string) => {
-	fieldsToValidate.value.add(fieldName)
-
-	// Run validation only on touched fields
-	validationErrors.value = validateSignup(formState).filter(error =>
-		fieldsToValidate.value.has(error.name),
-	)
-}
-
-// Full form validation
-const validateForm = () => {
-	validationErrors.value = validateSignup(formState)
-	return validationErrors.value.length === 0
-}
-
-// Field validation error getters
-const nameError = computed(
-	() =>
-		validationErrors.value.find(error => error.name === 'name')?.message || '',
-)
-
-const emailError = computed(
-	() =>
-		validationErrors.value.find(error => error.name === 'email')?.message || '',
-)
-
-const passwordError = computed(
-	() =>
-		validationErrors.value.find(error => error.name === 'password')?.message ||
-		'',
-)
-
-const confirmPasswordError = computed(
-	() =>
-		validationErrors.value.find(error => error.name === 'confirmPassword')
-			?.message || '',
-)
-
-// Check if form is valid using computed property
-const isFormValid = computed(() => {
-	try {
-		// Try to validate the form state without updating errors
-		const errors = validateSignup(formState)
-		return errors.length === 0
-	} catch (error) {
-		return false
-	}
-})
+// Field validation errors
+const nameError = getFieldError('name')
+const emailError = getFieldError('email')
+const passwordError = getFieldError('password')
+const confirmPasswordError = getFieldError('confirmPassword')
 
 // Form submission
 const handleSubmit = async (event: any) => {
