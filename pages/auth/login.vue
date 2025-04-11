@@ -17,9 +17,20 @@ const formState = reactive({
 
 // Form validation
 const validationErrors = ref<{ name: string; message: string }[]>([])
+const fieldsToValidate = ref<Set<string>>(new Set())
 
-// Handle validation
-const validate = () => {
+// Handle field validation
+const validateField = (fieldName: string) => {
+	fieldsToValidate.value.add(fieldName)
+
+	// Run validation only on touched fields
+	validationErrors.value = validateLogin(formState).filter(error =>
+		fieldsToValidate.value.has(error.name),
+	)
+}
+
+// Full form validation
+const validateForm = () => {
 	validationErrors.value = validateLogin(formState)
 	return validationErrors.value.length === 0
 }
@@ -40,7 +51,7 @@ const passwordError = computed(
 // Form submission
 const handleSubmit = async (event: any) => {
 	// Ensure validation is performed before proceeding
-	if (!validate()) {
+	if (!validateForm()) {
 		event.preventDefault()
 		return
 	}
@@ -110,7 +121,7 @@ const handleSubmit = async (event: any) => {
 						@blur="
 							() => {
 								formState.email = formState.email.trim()
-								validate()
+								validateField('email')
 							}
 						"
 					>
@@ -144,7 +155,7 @@ const handleSubmit = async (event: any) => {
 						size="lg"
 						autocomplete="off"
 						:color="passwordError ? 'error' : undefined"
-						@blur="validate()"
+						@blur="validateField('password')"
 					>
 						<template #trailing>
 							<button
