@@ -1,3 +1,22 @@
+<script setup lang="ts">
+// State for the component
+const shareableLink = ref('https://sharelinks.app/profile/user-123456')
+const copied = ref(false)
+
+// Copy link to clipboard
+function copyToClipboard() {
+	if (process.client) {
+		navigator.clipboard.writeText(shareableLink.value)
+		copied.value = true
+
+		// Reset the copied state after 2 seconds for the next click
+		setTimeout(() => {
+			copied.value = false
+		}, 2000)
+	}
+}
+</script>
+
 <template>
 	<header class="py-10 mb-8">
 		<div class="relative">
@@ -98,27 +117,6 @@
 		</div>
 	</header>
 </template>
-
-<script setup lang="ts">
-import { ref } from 'vue'
-
-// State for the component
-const shareableLink = ref('https://sharelinks.app/profile/user-123456')
-const copied = ref(false)
-
-// Copy link to clipboard
-function copyToClipboard() {
-	if (process.client) {
-		navigator.clipboard.writeText(shareableLink.value)
-		copied.value = true
-
-		// Reset the copied state after 2 seconds for the next click
-		setTimeout(() => {
-			copied.value = false
-		}, 2000)
-	}
-}
-</script>
 
 <style scoped>
 .check-icon-animation {
