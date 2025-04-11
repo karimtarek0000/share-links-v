@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { validateSignup } from '~/validation/authSchema'
+
 definePageMeta({
 	layout: 'auth',
 })
@@ -17,19 +19,45 @@ const formState = reactive({
 })
 
 // Form validation
-const isValidEmail = computed(() => {
-	if (!formState.email) return null
-	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-	return emailRegex.test(formState.email)
-})
+const validationErrors = ref<{ name: string; message: string }[]>([])
 
-const passwordsMatch = computed(() => {
-	if (!formState.confirmPassword) return null
-	return formState.password === formState.confirmPassword
-})
+// Handle validation
+const validate = () => {
+	validationErrors.value = validateSignup(formState)
+	return validationErrors.value.length === 0
+}
+
+// Field validation error getters
+const nameError = computed(
+	() =>
+		validationErrors.value.find(error => error.name === 'name')?.message || '',
+)
+
+const emailError = computed(
+	() =>
+		validationErrors.value.find(error => error.name === 'email')?.message || '',
+)
+
+const passwordError = computed(
+	() =>
+		validationErrors.value.find(error => error.name === 'password')?.message ||
+		'',
+)
+
+const confirmPasswordError = computed(
+	() =>
+		validationErrors.value.find(error => error.name === 'confirmPassword')
+			?.message || '',
+)
 
 // Form submission
 const handleSubmit = async (event: any) => {
+	// Ensure validation is performed before proceeding
+	if (!validate()) {
+		event.preventDefault()
+		return
+	}
+
 	isSubmitting.value = true
 	try {
 		// TODO: Implement actual registration logic
@@ -91,8 +119,33 @@ const handleSubmit = async (event: any) => {
 						size="lg"
 						autocomplete="off"
 						autofocus
-						@blur="formState.name = formState.name.trim()"
-					/>
+						:color="nameError ? 'error' : undefined"
+						:status="formState.name ? 'success' : undefined"
+						@blur="
+							() => {
+								formState.name = formState.name.trim()
+								validate()
+							}
+						"
+					>
+						<template #trailing>
+							<UIcon
+								v-if="formState.name"
+								:name="
+									!nameError
+										? 'i-heroicons-check-circle'
+										: 'i-heroicons-exclamation-circle'
+								"
+								class="h-5 w-5"
+								:class="!nameError ? 'text-green-500' : 'text-red-500'"
+							/>
+						</template>
+					</UInput>
+					<template #error>
+						<p v-if="nameError" class="text-red-500 text-sm animate-pulse">
+							{{ nameError }}
+						</p>
+					</template>
 				</UFormField>
 
 				<!-- Email field -->
@@ -104,31 +157,33 @@ const handleSubmit = async (event: any) => {
 						placeholder="your@email.com"
 						size="lg"
 						autocomplete="off"
-						:status="
-							isValidEmail === false
-								? 'error'
-								: isValidEmail
-								? 'success'
-								: undefined
+						:color="emailError ? 'error' : undefined"
+						:status="formState.email ? 'success' : undefined"
+						@blur="
+							() => {
+								formState.email = formState.email.trim()
+								validate()
+							}
 						"
-						:hint="
-							isValidEmail === false ? 'Please enter a valid email address' : ''
-						"
-						@blur="formState.email = formState.email.trim()"
 					>
 						<template #trailing>
 							<UIcon
 								v-if="formState.email"
 								:name="
-									isValidEmail
+									!emailError
 										? 'i-heroicons-check-circle'
 										: 'i-heroicons-exclamation-circle'
 								"
 								class="h-5 w-5"
-								:class="isValidEmail ? 'text-green-500' : 'text-red-500'"
+								:class="!emailError ? 'text-green-500' : 'text-red-500'"
 							/>
 						</template>
 					</UInput>
+					<template #error>
+						<p v-if="emailError" class="text-red-500 text-sm animate-pulse">
+							{{ emailError }}
+						</p>
+					</template>
 				</UFormField>
 
 				<!-- Password field -->
@@ -140,6 +195,8 @@ const handleSubmit = async (event: any) => {
 						placeholder="••••••••"
 						size="lg"
 						autocomplete="off"
+						:color="passwordError ? 'error' : undefined"
+						@blur="validate()"
 					>
 						<template #trailing>
 							<button
@@ -156,6 +213,11 @@ const handleSubmit = async (event: any) => {
 							</button>
 						</template>
 					</UInput>
+					<template #error>
+						<p v-if="passwordError" class="text-red-500 text-sm animate-pulse">
+							{{ passwordError }}
+						</p>
+					</template>
 				</UFormField>
 
 				<!-- Confirm Password field -->
@@ -167,26 +229,27 @@ const handleSubmit = async (event: any) => {
 						placeholder="••••••••"
 						size="lg"
 						autocomplete="off"
+						:color="confirmPasswordError ? 'error' : undefined"
 						:status="
-							passwordsMatch === false
-								? 'error'
-								: passwordsMatch
+							formState.confirmPassword && !confirmPasswordError
 								? 'success'
 								: undefined
 						"
-						:hint="passwordsMatch === false ? 'Passwords do not match' : ''"
+						@blur="validate()"
 					>
 						<template #trailing>
 							<div class="flex items-center space-x-2">
 								<UIcon
 									v-if="formState.confirmPassword"
 									:name="
-										passwordsMatch
+										!confirmPasswordError
 											? 'i-heroicons-check-circle'
 											: 'i-heroicons-exclamation-circle'
 									"
 									class="h-5 w-5"
-									:class="passwordsMatch ? 'text-green-500' : 'text-red-500'"
+									:class="
+										!confirmPasswordError ? 'text-green-500' : 'text-red-500'
+									"
 								/>
 								<button
 									type="button"
@@ -205,6 +268,14 @@ const handleSubmit = async (event: any) => {
 							</div>
 						</template>
 					</UInput>
+					<template #error>
+						<p
+							v-if="confirmPasswordError"
+							class="text-red-500 text-sm animate-pulse"
+						>
+							{{ confirmPasswordError }}
+						</p>
+					</template>
 				</UFormField>
 
 				<!-- Submit button -->
@@ -213,7 +284,6 @@ const handleSubmit = async (event: any) => {
 					block
 					size="lg"
 					:loading="isSubmitting"
-					:disabled="!isValidEmail || !passwordsMatch"
 					class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-300"
 				>
 					{{ isSubmitting ? 'Creating Account...' : 'Create Account' }}

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { validateLogin } from '~/validation/authSchema'
+
 definePageMeta({
 	layout: 'auth',
 })
@@ -13,15 +15,36 @@ const formState = reactive({
 	password: '',
 })
 
-// Email validation
-const isValidEmail = computed(() => {
-	if (!formState.email) return null
-	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-	return emailRegex.test(formState.email)
-})
+// Form validation
+const validationErrors = ref<{ name: string; message: string }[]>([])
+
+// Handle validation
+const validate = () => {
+	validationErrors.value = validateLogin(formState)
+	return validationErrors.value.length === 0
+}
+
+// Email validation status
+const emailError = computed(
+	() =>
+		validationErrors.value.find(error => error.name === 'email')?.message || '',
+)
+
+// Password validation status
+const passwordError = computed(
+	() =>
+		validationErrors.value.find(error => error.name === 'password')?.message ||
+		'',
+)
 
 // Form submission
 const handleSubmit = async (event: any) => {
+	// Ensure validation is performed before proceeding
+	if (!validate()) {
+		event.preventDefault()
+		return
+	}
+
 	isSubmitting.value = true
 	try {
 		// TODO: Implement actual auth logic
@@ -82,31 +105,33 @@ const handleSubmit = async (event: any) => {
 						size="lg"
 						autocomplete="off"
 						autofocus
-						:status="
-							isValidEmail === false
-								? 'error'
-								: isValidEmail
-								? 'success'
-								: undefined
+						:color="emailError ? 'error' : undefined"
+						:status="formState.email ? 'success' : undefined"
+						@blur="
+							() => {
+								formState.email = formState.email.trim()
+								validate()
+							}
 						"
-						:hint="
-							isValidEmail === false ? 'Please enter a valid email address' : ''
-						"
-						@blur="formState.email = formState.email.trim()"
 					>
 						<template #trailing>
 							<UIcon
 								v-if="formState.email"
 								:name="
-									isValidEmail
+									!emailError
 										? 'i-heroicons-check-circle'
 										: 'i-heroicons-exclamation-circle'
 								"
 								class="h-5 w-5"
-								:class="isValidEmail ? 'text-green-500' : 'text-red-500'"
+								:class="!emailError ? 'text-green-500' : 'text-red-500'"
 							/>
 						</template>
 					</UInput>
+					<template #error>
+						<p v-if="emailError" class="text-red-500 text-sm animate-pulse">
+							{{ emailError }}
+						</p>
+					</template>
 				</UFormField>
 
 				<!-- Password field -->
@@ -118,6 +143,8 @@ const handleSubmit = async (event: any) => {
 						placeholder="••••••••"
 						size="lg"
 						autocomplete="off"
+						:color="passwordError ? 'error' : undefined"
+						@blur="validate()"
 					>
 						<template #trailing>
 							<button
@@ -134,6 +161,11 @@ const handleSubmit = async (event: any) => {
 							</button>
 						</template>
 					</UInput>
+					<template #error>
+						<p v-if="passwordError" class="text-red-500 text-sm animate-pulse">
+							{{ passwordError }}
+						</p>
+					</template>
 				</UFormField>
 
 				<!-- Submit button -->
