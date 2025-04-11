@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { validateSignup } from '~/validation/authSchema'
+import { validateSignup } from '@/validation/authSchema'
 
 definePageMeta({
 	layout: 'auth',
