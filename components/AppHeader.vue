@@ -26,7 +26,7 @@ function copyToClipboard() {
 </script>
 
 <template>
-	<header class="py-10 mb-8">
+	<header class="py-10 mb-8 sticky top-0">
 		<div class="relative">
 			<!-- Background gradient effect with transition -->
 			<div
