@@ -7,7 +7,9 @@ const profileFormRef = useTemplateRef('profileForm')
 		<!-- Main layout container -->
 		<div class="flex flex-col md:flex-row gap-8 md:gap-12">
 			<!-- Preview Section (Left on desktop, Top on mobile) -->
-			<div class="w-full md:w-2/5 flex justify-center">
+			<div
+				class="w-full md:w-2/5 flex justify-center sticky max-sm:top-[300px]"
+			>
 				<ProfilePreview
 					:userData="
 						profileFormRef?.userData || {
