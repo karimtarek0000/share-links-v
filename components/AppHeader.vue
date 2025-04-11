@@ -2,15 +2,21 @@
 // State for the component
 const shareableLink = ref('https://sharelinks.app/profile/user-123456')
 const copied = ref(false)
+let timeoutId: number | null = null
 
 // Copy link to clipboard
 function copyToClipboard() {
-	if (process.client) {
+	if (typeof window !== 'undefined') {
 		navigator.clipboard.writeText(shareableLink.value)
 		copied.value = true
 
+		// Clear any existing timeout to prevent multiple timeouts
+		if (timeoutId) {
+			clearTimeout(timeoutId)
+		}
+
 		// Reset the copied state after 2 seconds for the next click
-		setTimeout(() => {
+		timeoutId = setTimeout(() => {
 			copied.value = false
 		}, 2000)
 	}
