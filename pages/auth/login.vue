@@ -73,6 +73,17 @@ const handleSubmit = async (event: any) => {
 		isSubmitting.value = false
 	}
 }
+
+// Check if form is valid using computed property
+const isFormValid = computed(() => {
+	try {
+		// Try to validate the form state without updating errors
+		const errors = validateLogin(formState)
+		return errors.length === 0
+	} catch (error) {
+		return false
+	}
+})
 </script>
 
 <template>
@@ -115,15 +126,10 @@ const handleSubmit = async (event: any) => {
 						placeholder="your@email.com"
 						size="lg"
 						autocomplete="off"
-						autofocus
 						:color="emailError ? 'error' : undefined"
-						:status="formState.email ? 'success' : undefined"
-						@blur="
-							() => {
-								formState.email = formState.email.trim()
-								validateField('email')
-							}
-						"
+						:status="formState.email && !emailError ? 'success' : undefined"
+						@blur="validateField('email')"
+						@update:model-value="validateField('email')"
 					>
 						<template #trailing>
 							<UIcon
@@ -155,7 +161,11 @@ const handleSubmit = async (event: any) => {
 						size="lg"
 						autocomplete="off"
 						:color="passwordError ? 'error' : undefined"
+						:status="
+							formState.password && !passwordError ? 'success' : undefined
+						"
 						@blur="validateField('password')"
+						@update:model-value="validateField('password')"
 					>
 						<template #trailing>
 							<button
@@ -185,6 +195,7 @@ const handleSubmit = async (event: any) => {
 					block
 					size="lg"
 					:loading="isSubmitting"
+					:disabled="!isFormValid || isSubmitting"
 					class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-300"
 				>
 					{{ isSubmitting ? 'Signing In...' : 'Sign In' }}

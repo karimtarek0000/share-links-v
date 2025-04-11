@@ -61,6 +61,17 @@ const confirmPasswordError = computed(
 			?.message || '',
 )
 
+// Check if form is valid using computed property
+const isFormValid = computed(() => {
+	try {
+		// Try to validate the form state without updating errors
+		const errors = validateSignup(formState)
+		return errors.length === 0
+	} catch (error) {
+		return false
+	}
+})
+
 // Form submission
 const handleSubmit = async (event: any) => {
 	// Ensure validation is performed before proceeding
@@ -129,15 +140,10 @@ const handleSubmit = async (event: any) => {
 						placeholder="John Doe"
 						size="lg"
 						autocomplete="off"
-						autofocus
 						:color="nameError ? 'error' : undefined"
-						:status="formState.name ? 'success' : undefined"
-						@blur="
-							() => {
-								formState.name = formState.name.trim()
-								validateField('name')
-							}
-						"
+						:status="formState.name && !nameError ? 'success' : undefined"
+						@blur="validateField('name')"
+						@update:model-value="validateField('name')"
 					>
 						<template #trailing>
 							<UIcon
@@ -169,13 +175,9 @@ const handleSubmit = async (event: any) => {
 						size="lg"
 						autocomplete="off"
 						:color="emailError ? 'error' : undefined"
-						:status="formState.email ? 'success' : undefined"
-						@blur="
-							() => {
-								formState.email = formState.email.trim()
-								validateField('email')
-							}
-						"
+						:status="formState.email && !emailError ? 'success' : undefined"
+						@blur="validateField('email')"
+						@update:model-value="validateField('email')"
 					>
 						<template #trailing>
 							<UIcon
@@ -207,21 +209,37 @@ const handleSubmit = async (event: any) => {
 						size="lg"
 						autocomplete="off"
 						:color="passwordError ? 'error' : undefined"
+						:status="
+							formState.password && !passwordError ? 'success' : undefined
+						"
 						@blur="validateField('password')"
+						@update:model-value="validateField('password')"
 					>
 						<template #trailing>
-							<button
-								type="button"
-								class="focus:outline-none flex"
-								@click="showPassword = !showPassword"
-							>
+							<div class="flex items-center space-x-2">
 								<UIcon
+									v-if="formState.password"
 									:name="
-										showPassword ? 'i-heroicons-eye-slash' : 'i-heroicons-eye'
+										!passwordError
+											? 'i-heroicons-check-circle'
+											: 'i-heroicons-exclamation-circle'
 									"
-									class="h-5 w-5 text-gray-400 hover:text-gray-600"
+									class="h-5 w-5"
+									:class="!passwordError ? 'text-green-500' : 'text-red-500'"
 								/>
-							</button>
+								<button
+									type="button"
+									class="focus:outline-none flex"
+									@click="showPassword = !showPassword"
+								>
+									<UIcon
+										:name="
+											showPassword ? 'i-heroicons-eye-slash' : 'i-heroicons-eye'
+										"
+										class="h-5 w-5 text-gray-400 hover:text-gray-600"
+									/>
+								</button>
+							</div>
 						</template>
 					</UInput>
 					<template #error>
@@ -247,6 +265,7 @@ const handleSubmit = async (event: any) => {
 								: undefined
 						"
 						@blur="validateField('confirmPassword')"
+						@update:model-value="validateField('confirmPassword')"
 					>
 						<template #trailing>
 							<div class="flex items-center space-x-2">
@@ -295,6 +314,7 @@ const handleSubmit = async (event: any) => {
 					block
 					size="lg"
 					:loading="isSubmitting"
+					:disabled="!isFormValid || isSubmitting"
 					class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-300"
 				>
 					{{ isSubmitting ? 'Creating Account...' : 'Create Account' }}
