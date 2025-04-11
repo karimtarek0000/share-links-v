@@ -4,8 +4,6 @@ const profileFormRef = useTemplateRef('profileForm')
 
 <template>
 	<div class="max-w-6xl mx-auto">
-		<AppHeader />
-
 		<!-- Main layout container -->
 		<div class="flex flex-col md:flex-row gap-8 md:gap-12">
 			<!-- Preview Section (Left on desktop, Top on mobile) -->
