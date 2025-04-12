@@ -44,10 +44,10 @@ export default defineEventHandler(async event => {
 		})
 
 		if (error) {
-			return {
-				statusCode: error.status || 400,
-				body: { error: error.message },
-			}
+			return createError({
+				statusCode: error.status,
+				message: error.message,
+			})
 		}
 
 		// Return user data and session
@@ -59,10 +59,10 @@ export default defineEventHandler(async event => {
 				message: 'User created successfully',
 			},
 		}
-	} catch (error) {
-		return {
-			statusCode: 500,
-			body: { error: 'Internal server error' },
-		}
+	} catch (error: any) {
+		return createError({
+			statusCode: error.status,
+			message: error.message,
+		})
 	}
 })
