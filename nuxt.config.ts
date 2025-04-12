@@ -10,4 +10,12 @@ export default defineNuxtConfig({
 		icons: ['heroicons', 'simple-icons'],
 		colorMode: false,
 	},
+	// Runtime config for environment variables
+	runtimeConfig: {
+		// Keys within public are exposed to the client
+		public: {
+			supabaseUrl: process.env.NUXT_PUBLIC_SUPABASE_URL,
+			supabaseKey: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY,
+		},
+	},
 })
