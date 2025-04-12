@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useAuthApi } from '@/composables/useAuthApi'
 import { validateSignup } from '@/validation/authSchema'
 
 definePageMeta({
@@ -12,15 +13,18 @@ const showConfirmPassword = ref(false)
 
 // Form schema and state
 const formState = reactive({
-	name: '',
-	email: '',
-	password: '',
-	confirmPassword: '',
+	name: 'karim',
+	email: 'karim@gmail.com',
+	password: 'karimKARIM@14',
+	confirmPassword: 'karimKARIM@14',
 })
 
 // Use form validation composable
 const { validateField, validateForm, getFieldError, isFormValid } =
 	useFormValidation(formState, validateSignup)
+// Get authApi composable
+const { signup } = useAuthApi()
+const toast = useToast()
 
 // Field validation errors
 const nameError = getFieldError('name')
@@ -30,26 +34,31 @@ const confirmPasswordError = getFieldError('confirmPassword')
 
 // Form submission
 const handleSubmit = async (event: any) => {
-	// Ensure validation is performed before proceeding
-	if (!validateForm()) {
-		event.preventDefault()
-		return
-	}
-
 	isSubmitting.value = true
-	try {
-		// TODO: Implement actual registration logic
-		console.log('Registration attempt:', {
-			name: formState.name,
-			email: formState.email,
-			password: formState.password,
-		})
-		await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
 
-		// Redirect to home page after successful signup
+	try {
+		// Call the signup method from our useAuthApi composable
+		const result = await signup(
+			formState.email,
+			formState.password,
+			formState.name,
+		)
+
+		toast.add({
+			title: result.body.message,
+			color: 'error',
+			icon: 'i-heroicons-check-circle',
+		})
+
+		// If signup was successful, redirect to home page
 		await navigateTo('/')
-	} catch (error) {
-		console.error('Registration error:', error)
+	} catch (error: any) {
+		toast.add({
+			title: error.message,
+			description: 'Please try again later.',
+			color: 'error',
+			icon: 'i-heroicons-exclamation-circle',
+		})
 	} finally {
 		isSubmitting.value = false
 	}
