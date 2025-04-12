@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { toast } from '#build/ui'
 import { validateLogin } from '@/validation/authSchema'
 
 definePageMeta({
