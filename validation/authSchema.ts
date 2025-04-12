@@ -48,18 +48,16 @@ export type ValidationError = {
 export const validateLogin = (state: any): ValidationError[] => {
 	const errors: ValidationError[] = []
 
-	try {
-		loginSchema.parse(state)
-	} catch (e: any) {
-		if (e.errors) {
-			e.errors.forEach((err: any) => {
-				const path = err.path.join('.')
-				errors.push({
-					name: path,
-					message: err.message,
-				})
+	const result = loginSchema.safeParse(state)
+
+	if (!result.success) {
+		result.error.errors.forEach(err => {
+			const path = err.path.join('.')
+			errors.push({
+				name: path,
+				message: err.message,
 			})
-		}
+		})
 	}
 
 	return errors
@@ -69,18 +67,16 @@ export const validateLogin = (state: any): ValidationError[] => {
 export const validateSignup = (state: any): ValidationError[] => {
 	const errors: ValidationError[] = []
 
-	try {
-		signupSchema.parse(state)
-	} catch (e: any) {
-		if (e.errors) {
-			e.errors.forEach((err: any) => {
-				const path = err.path.join('.')
-				errors.push({
-					name: path,
-					message: err.message,
-				})
+	const result = signupSchema.safeParse(state)
+
+	if (!result.success) {
+		result.error.errors.forEach(err => {
+			const path = err.path.join('.')
+			errors.push({
+				name: path,
+				message: err.message,
 			})
-		}
+		})
 	}
 
 	return errors

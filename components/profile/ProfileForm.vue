@@ -36,13 +36,9 @@ const extractedUsernames = ref<Record<number, string | null>>({})
 
 // Check if form is valid using Zod schema directly
 const isFormValid = computed(() => {
-	try {
-		// Directly use profileSchema to validate the entire form
-		profileSchema.parse(state)
-		return true
-	} catch (error) {
-		return false
-	}
+	// Directly use profileSchema to validate the entire form
+	const result = profileSchema.safeParse(state)
+	return result.success
 })
 
 // -----------------------------
@@ -68,10 +64,6 @@ const validateField = (fieldName: string) => {
 			fieldsToValidate.value.has(error.name) ||
 			(error.name === 'socials' && fieldsToValidate.value.has('socials')),
 	)
-}
-
-const validateState = () => {
-	errors.value = validateProfile(state)
 }
 
 // Image Handling Methods
@@ -182,18 +174,6 @@ function handleUrlChange(url: string, index: number): void {
 // Form submission handler
 async function onSubmit(event: FormSubmitEvent<UserData>) {
 	isLoading.value = true
-
-	// Final validation before submission - validate all fields
-	validateState()
-	if (errors.value.length > 0) {
-		toast.add({
-			title: 'Validation Error',
-			description: 'Please fix the errors in the form',
-			color: 'error',
-		})
-		isLoading.value = false
-		return
-	}
 
 	try {
 		// Simulate API call

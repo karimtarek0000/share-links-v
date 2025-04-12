@@ -36,13 +36,9 @@ export function useFormValidation<T extends Record<string, any>>(
 
 	// Check if form is valid using computed property
 	const isFormValid = computed(() => {
-		try {
-			// Try to validate the form state without updating errors
-			const errors = validationFn(formState)
-			return errors.length === 0
-		} catch (error) {
-			return false
-		}
+		// Validate the form state without updating errors
+		const errors = validationFn(formState)
+		return errors.length === 0
 	})
 
 	return {

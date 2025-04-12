@@ -53,18 +53,16 @@ export type ValidationError = {
 export const validateProfile = (state: any): ValidationError[] => {
 	const errors: ValidationError[] = []
 
-	try {
-		profileSchema.parse(state)
-	} catch (e: any) {
-		if (e.errors) {
-			e.errors.forEach((err: any) => {
-				const path = err.path.join('.')
-				errors.push({
-					name: path,
-					message: err.message,
-				})
+	const result = profileSchema.safeParse(state)
+
+	if (!result.success) {
+		result.error.errors.forEach(err => {
+			const path = err.path.join('.')
+			errors.push({
+				name: path,
+				message: err.message,
 			})
-		}
+		})
 	}
 
 	return errors
