@@ -1,2 +1,29 @@
 @import 'tailwindcss';
 @import '@nuxt/ui';
+
+.custom-scrollbar::-webkit-scrollbar {
+	width: 1px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+	background: #f3f4f6; /* Light gray background */
+	border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+	background: #2563eb; /* Blue-600 from Tailwind - assuming this is the secondary color */
+	border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+	background: #00c950; /* Green color for hover */
+}
+
+/* For Firefox */
+.custom-scrollbar {
+	scrollbar-width: thin;
+	scrollbar-color: #00c950 #f3f4f6; /* Updated hover color for Firefox */
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+	background: #00c950; /* Green color for hover */
+}

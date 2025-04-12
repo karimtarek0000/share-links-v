@@ -23,9 +23,14 @@ const profileFormRef = useTemplateRef('profileForm')
 			</div>
 
 			<!-- Form Section (Right on desktop, Bottom on mobile) -->
-			<div class="w-full md:w-3/5">
-				<ProfileForm ref="profileForm" />
+			<div class="w-full md:w-3/5 z-20">
+				<ProfileForm
+					ref="profileForm"
+					class="max-h-[78vh] py-2 px-1 overflow-auto custom-scrollbar"
+				/>
 			</div>
 		</div>
 	</div>
 </template>
+
+<style></style>
