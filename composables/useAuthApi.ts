@@ -1,9 +1,16 @@
-export const useAuthApi = () => {
-	const config = useRuntimeConfig()
+interface Data {
+	body: {
+		error?: { message: string }
+		message?: string
+	}
+	error: boolean
+	statusCode: number
+}
 
+export const useAuthApi = () => {
 	const signup = async (email: string, password: string, name: string) => {
 		try {
-			const { data, error } = await useFetch('/api/auth/signup', {
+			const data: Data = await $fetch('/api/auth/signup', {
 				method: 'POST',
 				body: {
 					email,
@@ -12,20 +19,31 @@ export const useAuthApi = () => {
 				},
 			})
 
-			if (error.value) {
-				throw new Error(error.value.message || 'Failed to sign up')
-			}
-
-			return data.value
+			return data
 		} catch (err: any) {
-			console.error('Signup API error:', err)
-			return { error: err.message || 'Failed to sign up' }
+			return Promise.reject(err.response._data)
+		}
+	}
+
+	const confirmEmail = async () => {
+		try {
+			const data = await $fetch('/api/auth/confirm-email', {
+				method: 'POST',
+				body: {
+					token_hash: window.location.hash,
+					type: 'email_confirmation',
+				},
+			})
+
+			return data
+		} catch (err: any) {
+			return Promise.reject(err.response._data)
 		}
 	}
 
 	const login = async (email: string, password: string) => {
 		try {
-			const { data, error } = await useFetch('/api/auth/login', {
+			const data = await $fetch('/api/auth/login', {
 				method: 'POST',
 				body: {
 					email,
@@ -33,36 +51,26 @@ export const useAuthApi = () => {
 				},
 			})
 
-			if (error.value) {
-				throw new Error(error.value.message || 'Failed to log in')
-			}
-
-			return data.value
+			return data
 		} catch (err: any) {
-			console.error('Login API error:', err)
-			return { error: err.message || 'Failed to log in' }
+			return Promise.reject(err.response._data)
 		}
 	}
 
 	const logout = async () => {
 		try {
-			const { data, error } = await useFetch('/api/auth/logout', {
+			const data = await $fetch('/api/auth/logout', {
 				method: 'POST',
 			})
-
-			if (error.value) {
-				throw new Error(error.value.message || 'Failed to log out')
-			}
-
-			return data.value
+			return data
 		} catch (err: any) {
 			console.error('Logout API error:', err)
-			return { error: err.message || 'Failed to log out' }
 		}
 	}
 
 	return {
 		signup,
+		confirmEmail,
 		login,
 		logout,
 	}
