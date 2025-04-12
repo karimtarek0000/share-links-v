@@ -231,7 +231,7 @@ defineExpose({ userData: state })
 	>
 		<UCard class="shadow-lg">
 			<template #header>
-				<div class="px-4 pt-4 pb-2">
+				<div class="px-4 pt-4 pb-2 text-center">
 					<h2 class="text-2xl font-semibold">Customize Your Links</h2>
 					<p class="text-sm text-gray-600 mt-1">
 						Update your profile information and manage your social links
@@ -286,7 +286,7 @@ defineExpose({ userData: state })
 							>
 								Upload Image
 							</UButton>
-							<p class="text-xs text-gray-500">
+							<p class="text-xs text-gray-500 text-center">
 								JPG, PNG, GIF or WEBP (max 5MB)
 							</p>
 						</div>
@@ -300,7 +300,7 @@ defineExpose({ userData: state })
 						@change="onImageSelected"
 					/>
 
-					<p class="text-sm text-gray-500 mt-4">
+					<p class="text-sm text-gray-500 mt-4 text-center">
 						<UIcon name="i-mdi-information-outline" class="inline mr-1" />
 						Drag and drop an image here, or click to browse
 					</p>

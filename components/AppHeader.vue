@@ -66,7 +66,7 @@ function copyToClipboard() {
 									v-model="shareableLink"
 									readonly
 									size="lg"
-									class="flex-grow-1"
+									class="flex-grow-1 pointer-events-none"
 								>
 									<template #leading>
 										<UIcon name="i-heroicons-link" class="h-5 text-gray-400" />
