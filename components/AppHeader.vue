@@ -1,7 +1,9 @@
 <script setup lang="ts">
 // State for the component
 const shareableLink = ref(
-	typeof window !== 'undefined' ? `${window.location.origin}/dhdksd01215` : '',
+	typeof window !== 'undefined'
+		? `${window.location.origin}/profile/dhdksd01215`
+		: '',
 )
 const copied = ref(false)
 let timeoutId: number | null = null
