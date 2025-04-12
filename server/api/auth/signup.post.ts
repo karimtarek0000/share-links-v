@@ -15,10 +15,11 @@ export default defineEventHandler(async event => {
 			confirmPassword: password,
 		})
 		if (!result.success) {
-			return {
+			return createError({
 				statusCode: 400,
-				body: { error: result.error.format() },
-			}
+				statusMessage: 'Validation error',
+				data: result.error.format(),
+			})
 		}
 
 		// Get runtime config to access environment variables
@@ -29,17 +30,20 @@ export default defineEventHandler(async event => {
 		const supabaseKey = config.public.supabaseKey
 
 		if (!supabaseUrl || !supabaseKey) {
-			throw new Error('Supabase configuration is missing')
+			return createError({
+				message: 'Supabase configuration is missing',
+			})
 		}
 
 		const supabase = createClient(supabaseUrl, supabaseKey)
 
-		// Sign up
+		// Sign up with email confirmation enabled
 		const { data, error } = await supabase.auth.signUp({
 			email,
 			password,
 			options: {
 				data: { name },
+				emailRedirectTo: `${config.public.appUrl}/auth/confirm-email`,
 			},
 		})
 
@@ -50,13 +54,14 @@ export default defineEventHandler(async event => {
 			})
 		}
 
-		// Return user data and session
+		// Return user data, session and confirmation message
 		return {
 			statusCode: 200,
 			body: {
 				user: data.user,
 				session: data.session,
-				message: 'User created successfully',
+				message:
+					'Registration successful. Please check your email to confirm your account.',
 			},
 		}
 	} catch (error: any) {
