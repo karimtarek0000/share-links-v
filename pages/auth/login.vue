@@ -30,7 +30,7 @@ const emailError = getFieldError('email')
 const passwordError = getFieldError('password')
 
 // Form submission
-const handleSubmit = async (event: any) => {
+const handleSubmit = async () => {
 	try {
 		isSubmitting.value = true
 		// Call the login method from our useAuthApi composable

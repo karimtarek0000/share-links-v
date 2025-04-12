@@ -38,7 +38,7 @@ const passwordError = getFieldError('password')
 const confirmPasswordError = getFieldError('confirmPassword')
 
 // Form submission
-const handleSubmit = async (event: any) => {
+const handleSubmit = async () => {
 	isSubmitting.value = true
 
 	try {
