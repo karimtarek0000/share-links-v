@@ -24,12 +24,12 @@ function copyToClipboard() {
 	}
 }
 
-// Dropdown items
+// Dropdown items with proper navigation
 const dropdownItems = [
 	{
 		label: 'Log out',
 		icon: 'i-heroicons-arrow-right-on-rectangle',
-		click: () => navigateTo('/auth/login'),
+		to: '/auth/login',
 	},
 ]
 </script>
@@ -50,20 +50,19 @@ const dropdownItems = [
 			<!-- Content -->
 			<div class="relative z-10 px-6 py-8 text-center">
 				<!-- User dropdown menu positioned at top right -->
-				<div class="absolute top-3 right-6">
+				<div class="absolute -top-3 right-6">
 					<UButtonGroup>
 						<UButton
 							variant="subtle"
-							color="gray"
-							class="rounded-full overflow-hidden p-0 border-2 border-white/50 shadow-md"
+							class="rounded-full overflow-hidden p-0 border-2 border-white/50 shadow-xl"
 						>
 							<div
-								class="w-9 h-9 flex items-center justify-center bg-gradient-to-r from-purple-500 to-blue-500"
+								class="w-9 h-9 flex items-center justify-center bg-gradient-to-r from-purple-500"
 							>
 								<UAvatar
 									src="https://i.pravatar.cc/100"
 									alt="User profile"
-									size="sm"
+									size="lg"
 								/>
 							</div>
 						</UButton>
