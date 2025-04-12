@@ -55,19 +55,25 @@ const handleSubmit = async (event: any) => {
 				access_token: result.body.session.access_token,
 				refresh_token: result.body.session.refresh_token,
 			})
-		}
 
-		toast.add({
-			title: 'Login successful!',
-			color: 'success',
-			icon: 'i-heroicons-check-circle',
-		})
+			toast.add({
+				title: 'Login successful!',
+				color: 'success',
+				icon: 'i-heroicons-check-circle',
+			})
+		}
 
 		// If login was successful, redirect to home page
 		navigateTo('/')
 	} catch (error: any) {
+		let message = error.message || 'Login failed'
+
+		if (message.includes('Invalid login credentials')) {
+			message = 'Email or password is incorrect'
+		}
+
 		toast.add({
-			title: error.message || 'Login failed',
+			title: message,
 			description: 'Please try again later.',
 			color: 'error',
 			icon: 'i-heroicons-exclamation-circle',

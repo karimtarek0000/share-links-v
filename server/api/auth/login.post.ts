@@ -38,40 +38,10 @@ export default defineEventHandler(async event => {
 
 		// Handle email confirmation errors
 		if (error) {
-			if (error.message.includes('Email not confirmed')) {
-				return {
-					statusCode: 401,
-					body: {
-						error:
-							'Please check your email and confirm your account before logging in.',
-						emailNotConfirmed: true,
-					},
-				}
-			}
-
-			return {
-				statusCode: error.status || 400,
-				body: { error: error.message },
-			}
-		}
-
-		// For additional security, check email confirmation status on the user object
-		if (data.user && data.user.email_confirmed_at === null) {
-			// Send another confirmation email if needed
-			await supabase.auth.resendConfirmationEmail({
-				email,
-				options: {
-					emailRedirectTo: `${config.public.appUrl}/auth/confirm-email`,
-				},
+			return createError({
+				statusCode: error.status,
+				message: error.message,
 			})
-
-			return {
-				statusCode: 401,
-				body: {
-					error: 'Email not confirmed. We have sent a new confirmation email.',
-					emailNotConfirmed: true,
-				},
-			}
 		}
 
 		// Return user data and session
@@ -88,10 +58,10 @@ export default defineEventHandler(async event => {
 				},
 			},
 		}
-	} catch (error) {
-		return {
-			statusCode: 500,
-			body: { error: 'Internal server error' },
-		}
+	} catch (error: any) {
+		return createError({
+			statusCode: error.status,
+			message: error.message,
+		})
 	}
 })
