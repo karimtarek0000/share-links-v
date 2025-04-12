@@ -23,6 +23,15 @@ function copyToClipboard() {
 		}, 2000)
 	}
 }
+
+// Dropdown items
+const dropdownItems = [
+	{
+		label: 'Log out',
+		icon: 'i-heroicons-arrow-right-on-rectangle',
+		click: () => navigateTo('/auth/login'),
+	},
+]
 </script>
 
 <template>
@@ -40,6 +49,36 @@ function copyToClipboard() {
 
 			<!-- Content -->
 			<div class="relative z-10 px-6 py-8 text-center">
+				<!-- User dropdown menu positioned at top right -->
+				<div class="absolute top-3 right-6">
+					<UButtonGroup>
+						<UButton
+							variant="subtle"
+							color="gray"
+							class="rounded-full overflow-hidden p-0 border-2 border-white/50 shadow-md"
+						>
+							<div
+								class="w-9 h-9 flex items-center justify-center bg-gradient-to-r from-purple-500 to-blue-500"
+							>
+								<UAvatar
+									src="https://i.pravatar.cc/100"
+									alt="User profile"
+									size="sm"
+								/>
+							</div>
+						</UButton>
+
+						<UDropdownMenu :items="dropdownItems">
+							<UButton
+								color="gray"
+								variant="subtle"
+								icon="i-heroicons-chevron-down"
+								class="hover:bg-white/30 transition-all"
+							/>
+						</UDropdownMenu>
+					</UButtonGroup>
+				</div>
+
 				<h1
 					class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 mb-3"
 				>
