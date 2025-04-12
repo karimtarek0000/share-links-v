@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { UFormField } from '#components'
 import { validateLogin } from '@/validation/authSchema'
 
 definePageMeta({
 	layout: 'auth',
+	middleware: 'auth',
 })
 
 // Form state
@@ -11,7 +13,7 @@ const showPassword = ref(false)
 
 // Form schema and state
 const formState = reactive({
-	email: 'karimd@gmail.com',
+	email: 'arttract3@gmail.com',
 	password: 'karimKARIM@14',
 })
 
@@ -30,10 +32,9 @@ const passwordError = getFieldError('password')
 // Form submission
 const handleSubmit = async (event: any) => {
 	try {
+		isSubmitting.value = true
 		// Call the login method from our useAuthApi composable
 		const result = await login(formState.email, formState.password)
-
-		console.log(result)
 
 		if (result.body.emailNotConfirmed) {
 			toast.add({
@@ -45,6 +46,17 @@ const handleSubmit = async (event: any) => {
 			return
 		}
 
+		// If we have session data from the API response, we need to set it in Supabase client
+		if (result.body.session) {
+			const { supabase } = useSupabase()
+
+			// Store the session in the browser
+			await supabase.auth.setSession({
+				access_token: result.body.session.access_token,
+				refresh_token: result.body.session.refresh_token,
+			})
+		}
+
 		toast.add({
 			title: 'Login successful!',
 			color: 'success',
@@ -52,10 +64,10 @@ const handleSubmit = async (event: any) => {
 		})
 
 		// If login was successful, redirect to home page
-		// await navigateTo('/')
+		navigateTo('/')
 	} catch (error: any) {
 		toast.add({
-			title: error.message,
+			title: error.message || 'Login failed',
 			description: 'Please try again later.',
 			color: 'error',
 			icon: 'i-heroicons-exclamation-circle',
