@@ -1,4 +1,4 @@
-# Share-Linkes
+# Share-Links
 
 Share-Linkes is a modern, customizable "link-in-bio" web application built with
 Nuxt.js. It allows users to create and share a personalized profile page with
