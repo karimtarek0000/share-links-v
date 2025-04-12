@@ -50,19 +50,21 @@ const dropdownItems = [
 			<!-- Content -->
 			<div class="relative z-10 px-6 py-8 text-center">
 				<!-- User dropdown menu positioned at top right -->
-				<div class="absolute -top-3 right-6">
+				<div
+					class="absolute flex rounded-full -top-5 shadow shadow-lg right-2 border border-blue-700"
+				>
 					<UButtonGroup>
 						<UButton
 							variant="subtle"
-							class="rounded-full overflow-hidden p-0 border-2 border-white/50 shadow-xl"
+							class="rounded-full overflow-hidden p-0 shadow-xl"
 						>
 							<div
-								class="w-9 h-9 flex items-center justify-center bg-gradient-to-r from-purple-500"
+								class="size-12 rounded-full flex items-center justify-center"
 							>
 								<UAvatar
 									src="https://i.pravatar.cc/100"
 									alt="User profile"
-									size="lg"
+									size="xl"
 								/>
 							</div>
 						</UButton>
