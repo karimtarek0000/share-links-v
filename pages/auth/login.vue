@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { toast } from '#build/ui'
 import { validateLogin } from '@/validation/authSchema'
 
 definePageMeta({
@@ -11,13 +12,17 @@ const showPassword = ref(false)
 
 // Form schema and state
 const formState = reactive({
-	email: '',
-	password: '',
+	email: 'karimd@gmail.com',
+	password: 'karimKARIM@14',
 })
 
 // Use form validation composable
-const { validateField, validateForm, getFieldError, isFormValid } =
-	useFormValidation(formState, validateLogin)
+const { validateField, getFieldError, isFormValid } = useFormValidation(
+	formState,
+	validateLogin,
+)
+const { login } = useAuthApi()
+const toast = useToast()
 
 // Field validation errors
 const emailError = getFieldError('email')
@@ -25,25 +30,37 @@ const passwordError = getFieldError('password')
 
 // Form submission
 const handleSubmit = async (event: any) => {
-	// Ensure validation is performed before proceeding
-	if (!validateForm()) {
-		event.preventDefault()
-		return
-	}
-
-	isSubmitting.value = true
 	try {
-		// TODO: Implement actual auth logic
-		console.log('Login attempt:', {
-			email: formState.email,
-			password: formState.password,
-		})
-		await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
+		// Call the login method from our useAuthApi composable
+		const result = await login(formState.email, formState.password)
 
-		// Redirect to home page after successful login
-		await navigateTo('/')
-	} catch (error) {
-		console.error('Login error:', error)
+		console.log(result)
+
+		if (result.body.emailNotConfirmed) {
+			toast.add({
+				title: 'Email not confirmed',
+				description: 'Please check your email for confirmation.',
+				color: 'error',
+				icon: 'i-heroicons-exclamation-circle',
+			})
+			return
+		}
+
+		toast.add({
+			title: 'Login successful!',
+			color: 'success',
+			icon: 'i-heroicons-check-circle',
+		})
+
+		// If login was successful, redirect to home page
+		// await navigateTo('/')
+	} catch (error: any) {
+		toast.add({
+			title: error.message,
+			description: 'Please try again later.',
+			color: 'error',
+			icon: 'i-heroicons-exclamation-circle',
+		})
 	} finally {
 		isSubmitting.value = false
 	}
