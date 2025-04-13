@@ -22,8 +22,9 @@ const { validateField, getFieldError, isFormValid } = useFormValidation(
 	formState,
 	validateLogin,
 )
-const { login } = useAuthApi()
+const { login, logout } = useAuthApi()
 const toast = useToast()
+const route = useRoute()
 
 // Field validation errors
 const emailError = getFieldError('email')
@@ -82,6 +83,22 @@ const handleSubmit = async () => {
 		isSubmitting.value = false
 	}
 }
+
+// Check for email verification redirect
+;(async () => {
+	const fullPath = route.fullPath
+	if (fullPath.includes('type=signup') && fullPath.includes('token=')) {
+		toast.add({
+			title: 'Email verified successfully!',
+			description: 'Please sign in with your credentials to continue.',
+			color: 'success',
+			icon: 'i-heroicons-check-circle',
+		})
+
+		await logout()
+		navigateTo('/auth/login')
+	}
+})()
 </script>
 
 <template>
