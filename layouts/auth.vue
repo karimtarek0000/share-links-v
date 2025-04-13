@@ -3,30 +3,7 @@
 		class="min-h-screen flex flex-col items-center justify-center px-4 py-12"
 	>
 		<div class="flex items-center mb-8">
-			<svg
-				class="w-16 h-16 mr-3"
-				viewBox="0 0 24 24"
-				fill="none"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<path
-					d="M18 8C19.6569 8 21 6.65685 21 5C21 3.34315 19.6569 2 18 2C16.3431 2 15 3.34315 15 5C15 5.12036 15.0077 5.23846 15.0227 5.35376L8.18856 8.76446C7.69454 8.29251 7.04897 8 6.34315 8C4.68629 8 3.34315 9.34315 3.34315 11C3.34315 12.6569 4.68629 14 6.34315 14C7.04897 14 7.69454 13.7075 8.18856 13.2355L15.0227 16.6462C15.0077 16.7615 15 16.8796 15 17C15 18.6569 16.3431 20 18 20C19.6569 20 21 18.6569 21 17C21 15.3431 19.6569 14 18 14C17.2941 14 16.6485 14.2733 16.1545 14.7241L9.32038 11.3134C9.33645 11.2107 9.34315 11.1059 9.34315 11C9.34315 10.8941 9.33645 10.7893 9.32038 10.6866L16.1545 7.27593C16.6485 7.72669 17.2941 8 18 8Z"
-					fill="url(#gradient)"
-				/>
-				<defs>
-					<linearGradient
-						id="gradient"
-						x1="3"
-						y1="2"
-						x2="21"
-						y2="20"
-						gradientUnits="userSpaceOnUse"
-					>
-						<stop offset="0%" stop-color="#9333ea" />
-						<stop offset="100%" stop-color="#2563eb" />
-					</linearGradient>
-				</defs>
-			</svg>
+			<Logo />
 			<h1
 				class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 mb-3"
 			>
