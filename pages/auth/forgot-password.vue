@@ -34,7 +34,7 @@ const handleSubmit = async () => {
 	isSubmitting.value = true
 
 	try {
-		const result = await forgotPassword(formState.email)
+		await forgotPassword(formState.email)
 
 		// Update UI to show success message
 		emailSent.value = true
@@ -43,8 +43,8 @@ const handleSubmit = async () => {
 		toast.add({
 			title: 'Reset email sent!',
 			description: 'Check your inbox for password reset instructions',
-			color: 'green',
-			icon: 'i-heroicons-envelope-check',
+			color: 'success',
+			icon: '',
 		})
 	} catch (error: any) {
 		toast.add({
