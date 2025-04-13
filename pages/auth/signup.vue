@@ -43,16 +43,12 @@ const handleSubmit = async () => {
 
 	try {
 		// Call the signup method from our useAuthApi composable
-		const result = await signup(
-			formState.email,
-			formState.password,
-			formState.name,
-		)
+		await signup(formState.email, formState.password, formState.name)
 
 		toast.add({
 			title: 'Account created successfully!',
 			description: 'Please check your email to confirm your account.',
-			color: 'green',
+			color: 'success',
 			icon: 'i-heroicons-check-circle',
 		})
 
