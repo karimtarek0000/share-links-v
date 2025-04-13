@@ -5,7 +5,7 @@ const { logout } = useAuthApi()
 export default defineNuxtRouteMiddleware(async to => {
 	const { user, getCurrentUser } = useSupabase()
 
-	if (to.query.fromMail) {
+	if (to.query.confirmEmail || to.query.resetPassword) {
 		await logout()
 		return
 	}
