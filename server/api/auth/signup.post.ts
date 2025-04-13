@@ -35,7 +35,7 @@ export default defineEventHandler(async event => {
 			password,
 			options: {
 				data: { name },
-				emailRedirectTo: `${config.appUrl}/auth/login`,
+				emailRedirectTo: `${config.public.appUrl}/auth/login/?fromMail=true&confirmEmail=true`,
 			},
 		})
 
