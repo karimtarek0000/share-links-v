@@ -25,22 +25,6 @@ export const useAuthApi = () => {
 		}
 	}
 
-	const confirmEmail = async () => {
-		try {
-			const data = await $fetch('/api/auth/confirm-email', {
-				method: 'POST',
-				body: {
-					token_hash: window.location.hash,
-					type: 'email_confirmation',
-				},
-			})
-
-			return data
-		} catch (err: any) {
-			return Promise.reject(err.response._data)
-		}
-	}
-
 	const login = async (email: string, password: string) => {
 		try {
 			const data = await $fetch('/api/auth/login', {
@@ -70,7 +54,6 @@ export const useAuthApi = () => {
 
 	return {
 		signup,
-		confirmEmail,
 		login,
 		logout,
 	}
