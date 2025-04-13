@@ -1,7 +1,14 @@
-import { useSupabase } from '~/composables/useSupabase'
+import { useAuthApi } from '@/composables/useAuthApi'
+import { useSupabase } from '@/composables/useSupabase'
+const { logout } = useAuthApi()
 
 export default defineNuxtRouteMiddleware(async to => {
 	const { user, getCurrentUser } = useSupabase()
+
+	if (to.query.fromMail) {
+		await logout()
+		return
+	}
 
 	// Check if user is already authenticated
 	if (!user.value) {
