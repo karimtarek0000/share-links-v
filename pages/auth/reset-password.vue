@@ -51,6 +51,7 @@ const handleSubmit = async () => {
 				color: 'error',
 				icon: 'i-heroicons-exclamation-circle',
 			})
+			return
 		}
 
 		// Show success message
