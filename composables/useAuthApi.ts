@@ -46,9 +46,12 @@ export const useAuthApi = () => {
 			const data = await $fetch('/api/auth/logout', {
 				method: 'POST',
 			})
+
+			localStorage.removeItem('sb-jimcygitqskqhzefxgaw-auth-token')
+
 			return data
 		} catch (err: any) {
-			console.error('Logout API error:', err)
+			return Promise.reject(err.response._data)
 		}
 	}
 
