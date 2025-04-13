@@ -1,5 +1,5 @@
+import { useServerSupabase } from '@/composables/useServerSupabase'
 import { loginSchema } from '@/validation/authSchema'
-import { createClient } from '@supabase/supabase-js'
 
 export default defineEventHandler(async event => {
 	try {
@@ -17,18 +17,9 @@ export default defineEventHandler(async event => {
 
 		const { email, password } = result.data
 
-		// Get runtime config to access environment variables
-		const config = useRuntimeConfig()
-
-		// Access Supabase credentials from runtime config
-		const supabaseUrl = config.public.supabaseUrl
-		const supabaseKey = config.public.supabaseKey
-
-		if (!supabaseUrl || !supabaseKey) {
-			throw new Error('Supabase configuration is missing')
-		}
-
-		const supabase = createClient(supabaseUrl, supabaseKey)
+		// Use the server Supabase composable
+		const { getSupabaseClient, handleSupabaseError } = useServerSupabase()
+		const supabase = getSupabaseClient()
 
 		// Attempt to sign in
 		const { data, error } = await supabase.auth.signInWithPassword({
@@ -38,10 +29,7 @@ export default defineEventHandler(async event => {
 
 		// Handle email confirmation errors
 		if (error) {
-			return createError({
-				statusCode: error.status,
-				message: error.message,
-			})
+			return handleSupabaseError(error)
 		}
 
 		// Return user data and session
@@ -59,9 +47,6 @@ export default defineEventHandler(async event => {
 			},
 		}
 	} catch (error: any) {
-		return createError({
-			statusCode: error.status,
-			message: error.message,
-		})
+		return handleSupabaseError(error)
 	}
 })

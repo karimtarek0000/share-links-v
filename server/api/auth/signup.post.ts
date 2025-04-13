@@ -1,5 +1,5 @@
+import { useServerSupabase } from '@/composables/useServerSupabase'
 import { signupSchema } from '@/validation/authSchema'
-import { createClient } from '@supabase/supabase-js'
 
 export default defineEventHandler(async event => {
 	try {
@@ -25,17 +25,9 @@ export default defineEventHandler(async event => {
 		// Get runtime config to access environment variables
 		const config = useRuntimeConfig()
 
-		// Access Supabase credentials from runtime config
-		const supabaseUrl = config.public.supabaseUrl
-		const supabaseKey = config.public.supabaseKey
-
-		if (!supabaseUrl || !supabaseKey) {
-			return createError({
-				message: 'Supabase configuration is missing',
-			})
-		}
-
-		const supabase = createClient(supabaseUrl, supabaseKey)
+		// Use the server Supabase composable
+		const { getSupabaseClient, handleSupabaseError } = useServerSupabase()
+		const supabase = getSupabaseClient()
 
 		// Sign up with email confirmation enabled
 		const { data, error } = await supabase.auth.signUp({
@@ -43,15 +35,12 @@ export default defineEventHandler(async event => {
 			password,
 			options: {
 				data: { name },
-				emailRedirectTo: `${config.public.appUrl}/auth/confirm-email`,
+				emailRedirectTo: `${config.public.appUrl}/auth/login`,
 			},
 		})
 
 		if (error) {
-			return createError({
-				statusCode: error.status,
-				message: error.message,
-			})
+			return handleSupabaseError(error)
 		}
 
 		// Return user data, session and confirmation message
@@ -66,8 +55,8 @@ export default defineEventHandler(async event => {
 		}
 	} catch (error: any) {
 		return createError({
-			statusCode: error.status,
-			message: error.message,
+			statusCode: error.status || 500,
+			message: error.message || 'An error occurred during signup',
 		})
 	}
 })

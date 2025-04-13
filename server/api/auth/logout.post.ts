@@ -1,28 +1,16 @@
-import { createClient } from '@supabase/supabase-js'
+import { useServerSupabase } from '@/composables/useServerSupabase'
 
 export default defineEventHandler(async event => {
 	try {
-		// Get runtime config to access environment variables
-		const config = useRuntimeConfig()
-
-		// Access Supabase credentials from runtime config
-		const supabaseUrl = config.public.supabaseUrl
-		const supabaseKey = config.public.supabaseKey
-
-		if (!supabaseUrl || !supabaseKey) {
-			throw new Error('Supabase configuration is missing')
-		}
-
-		const supabase = createClient(supabaseUrl, supabaseKey)
+		// Use the server Supabase composable
+		const { getSupabaseClient, handleSupabaseError } = useServerSupabase()
+		const supabase = getSupabaseClient()
 
 		// Sign out the user
 		const { error } = await supabase.auth.signOut()
 
 		if (error) {
-			return createError({
-				statusCode: error.status,
-				message: error.message,
-			})
+			return handleSupabaseError(error)
 		}
 
 		// Return success message
@@ -32,8 +20,8 @@ export default defineEventHandler(async event => {
 		}
 	} catch (error: any) {
 		return createError({
-			statusCode: error.status,
-			message: error.message,
+			statusCode: error.status || 500,
+			message: error.message || 'An error occurred during logout',
 		})
 	}
 })
