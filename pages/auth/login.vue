@@ -85,20 +85,16 @@ const handleSubmit = async () => {
 }
 
 // Check for email verification redirect
-;(async () => {
-	const fullPath = route.fullPath
-	if (fullPath.includes('type=signup') && fullPath.includes('token=')) {
+onMounted(() => {
+	if (route.query.confirmEmail) {
 		toast.add({
 			title: 'Email verified successfully!',
 			description: 'Please sign in with your credentials to continue.',
 			color: 'success',
 			icon: 'i-heroicons-check-circle',
 		})
-
-		await logout()
-		navigateTo('/auth/login')
 	}
-})()
+})
 </script>
 
 <template>
