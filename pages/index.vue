@@ -1,5 +1,9 @@
 <script setup lang="ts">
 const profileFormRef = useTemplateRef('profileForm')
+
+definePageMeta({
+	middleware: 'auth',
+})
 </script>
 
 <template>
