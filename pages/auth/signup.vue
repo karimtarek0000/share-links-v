@@ -98,7 +98,11 @@ const handleSubmit = async () => {
 				<h1 class="text-2xl font-bold mb-2">Check your email</h1>
 				<p class="text-gray-600 dark:text-gray-400 mb-4">
 					We've sent a confirmation email to:<br />
-					<span class="font-semibold">{{ registrationEmail }}</span>
+					<a
+						class="font-semibold underline mt-2"
+						href="mailto:{{ registrationEmail }}"
+						>{{ registrationEmail }}</a
+					>
 				</p>
 				<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
 					Please click the link in the email to verify your account.
