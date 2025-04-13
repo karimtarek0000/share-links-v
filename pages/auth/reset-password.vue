@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { validateResetPassword } from '@/validation/authSchema'
-import { useSupabase } from '~/composables/useSupabase'
+import { useSupabase } from '@/composables/useSupabase'
 
 // Don't use auth middleware for this page
 definePageMeta({
@@ -33,16 +33,30 @@ const confirmPasswordError = getFieldError('confirmPassword')
 
 // Get Supabase client
 const { supabase } = useSupabase()
+const { logout } = useAuthApi()
+
+const tokens = reactive({
+	access_token: '',
+	refresh_token: '',
+})
 
 // Form submission
 const handleSubmit = async () => {
 	isSubmitting.value = true
 
 	try {
+		// Set accesstoken and refresh token
+		await supabase.auth.setSession({
+			access_token: tokens.access_token,
+			refresh_token: tokens.refresh_token,
+		})
+
 		// Update user's password
 		const { error } = await supabase.auth.updateUser({
 			password: formState.password,
 		})
+
+		await logout()
 
 		if (error) {
 			toast.add({
@@ -74,6 +88,17 @@ const handleSubmit = async () => {
 		isSubmitting.value = false
 	}
 }
+
+onMounted(() => {
+	const hashParams = new URLSearchParams(window.location.hash.slice(1))
+	const access_token = hashParams.get('access_token')
+	const refresh_token = hashParams.get('refresh_token')
+
+	if (access_token && refresh_token) {
+		tokens.access_token = access_token
+		tokens.refresh_token = refresh_token
+	}
+})
 </script>
 
 <template>
