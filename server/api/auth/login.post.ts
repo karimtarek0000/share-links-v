@@ -47,6 +47,10 @@ export default defineEventHandler(async event => {
 			},
 		}
 	} catch (error: any) {
-		return handleSupabaseError(error)
+		return createError({
+			statusCode: error.status || 500,
+			message:
+				error.message || 'An error occurred while processing your request',
+		})
 	}
 })
