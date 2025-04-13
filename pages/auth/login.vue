@@ -13,8 +13,8 @@ const showPassword = ref(false)
 
 // Form schema and state
 const formState = reactive({
-	email: 'arttract3@gmail.com',
-	password: 'karimKARIM@14',
+	email: '',
+	password: '',
 })
 
 // Use form validation composable
