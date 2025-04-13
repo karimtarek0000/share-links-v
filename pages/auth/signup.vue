@@ -16,10 +16,10 @@ const registrationEmail = ref('')
 
 // Form schema and state
 const formState = reactive({
-	name: 'karim',
-	email: 'karim@gmail.com',
-	password: 'karimKARIM@14',
-	confirmPassword: 'karimKARIM@14',
+	name: '',
+	email: '',
+	password: '',
+	confirmPassword: '',
 })
 
 // Use form validation composable
