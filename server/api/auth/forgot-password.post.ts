@@ -32,7 +32,7 @@ export default defineEventHandler(async event => {
 
 		// Send password reset email
 		const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-			redirectTo: `${config.public.appUrl}/auth/reset-password/?fromMail=true`,
+			redirectTo: `${config.public.appUrl}/auth/reset-password/?resetPassword=true`,
 		})
 
 		if (error) {
