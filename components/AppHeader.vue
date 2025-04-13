@@ -82,11 +82,14 @@ const dropdownItems = [
 					</UButtonGroup>
 				</div>
 
-				<h1
-					class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 mb-3"
-				>
-					Share Profile Links
-				</h1>
+				<div class="flex items-center justify-center">
+					<Logo />
+					<h1
+						class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 mb-3"
+					>
+						Share Profile Links
+					</h1>
+				</div>
 				<p
 					class="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto font-light mb-6"
 				>
