@@ -5,6 +5,7 @@ import { useSupabase } from '~/composables/useSupabase'
 // Don't use auth middleware for this page
 definePageMeta({
 	layout: 'auth',
+	middleware: 'auth',
 })
 
 // Form state
@@ -12,7 +13,6 @@ const isSubmitting = ref(false)
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 const resetComplete = ref(false)
-const router = useRouter()
 const toast = useToast()
 
 // Form schema and state
@@ -44,7 +44,14 @@ const handleSubmit = async () => {
 			password: formState.password,
 		})
 
-		if (error) throw error
+		if (error) {
+			toast.add({
+				title: error.message || 'Failed to update password',
+				description: 'Failed to update password',
+				color: 'error',
+				icon: 'i-heroicons-exclamation-circle',
+			})
+		}
 
 		// Show success message
 		resetComplete.value = true
@@ -52,14 +59,9 @@ const handleSubmit = async () => {
 		toast.add({
 			title: 'Password updated successfully!',
 			description: 'You can now log in with your new password',
-			color: 'green',
+			color: 'success',
 			icon: 'i-heroicons-check-circle',
 		})
-
-		// Redirect to login after 3 seconds
-		setTimeout(() => {
-			router.push('/auth/login')
-		}, 3000)
 	} catch (error: any) {
 		toast.add({
 			title: error.message || 'Failed to reset password',
