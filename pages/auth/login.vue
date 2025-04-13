@@ -187,6 +187,16 @@ const handleSubmit = async () => {
 					</template>
 				</UFormField>
 
+				<!-- Forgot password link -->
+				<div class="flex justify-end">
+					<NuxtLink
+						to="/auth/forgot-password"
+						class="text-sm text-gray-500 hover:text-blue-600 transition-colors"
+					>
+						Forgot your password?
+					</NuxtLink>
+				</div>
+
 				<!-- Submit button -->
 				<UButton
 					type="submit"

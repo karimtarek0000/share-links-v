@@ -1,4 +1,4 @@
-import { useSupabase } from '@/composables/useSupabase'
+import { useSupabase } from '~/composables/useSupabase'
 
 export default defineNuxtRouteMiddleware(async to => {
 	const { user, getCurrentUser } = useSupabase()

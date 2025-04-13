@@ -35,7 +35,6 @@ export const useSupabase = () => {
 				user.value = data.session.user
 				return user.value
 			} else {
-				console.log('No active session found')
 				user.value = null
 				return null
 			}

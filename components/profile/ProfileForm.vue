@@ -184,9 +184,6 @@ async function onSubmit(event: FormSubmitEvent<UserData>) {
 			color: 'success',
 			icon: 'i-mdi-check',
 		})
-
-		// Here you would actually save the data to your backend
-		console.log(event.data)
 	} catch (error) {
 		toast.add({
 			title: 'Error',

@@ -1,4 +1,4 @@
-import { useServerSupabase } from '@/composables/useServerSupabase'
+import { useServerSupabase } from '~/composables/useServerSupabase'
 
 export default defineEventHandler(async event => {
 	try {

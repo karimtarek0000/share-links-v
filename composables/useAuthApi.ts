@@ -41,6 +41,21 @@ export const useAuthApi = () => {
 		}
 	}
 
+	const forgotPassword = async (email: string) => {
+		try {
+			const data = await $fetch('/api/auth/forgot-password', {
+				method: 'POST',
+				body: {
+					email,
+				},
+			})
+
+			return data
+		} catch (err: any) {
+			return Promise.reject(err.response._data)
+		}
+	}
+
 	const logout = async () => {
 		try {
 			const data = await $fetch('/api/auth/logout', {
@@ -59,5 +74,6 @@ export const useAuthApi = () => {
 		signup,
 		login,
 		logout,
+		forgotPassword,
 	}
 }
