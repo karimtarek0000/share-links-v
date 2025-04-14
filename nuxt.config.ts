@@ -12,6 +12,8 @@ export default defineNuxtConfig({
 	},
 	// Runtime config for environment variables
 	runtimeConfig: {
+		// Private keys (server-side only)
+		supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
 		// Keys within public are exposed to the client
 		public: {
 			appUrl: process.env.NUXT_PUBLIC_APP_URL,
