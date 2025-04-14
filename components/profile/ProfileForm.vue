@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { profileSchema, validateProfile } from '@/validation/profileSchema'
-import type { FormSubmitEvent } from '@nuxt/ui'
 
 // -----------------------------
 // Reactive State
@@ -27,8 +26,7 @@ const isLoading = ref(false)
 const { detectPlatform, extractUsername } = useSocialPlatforms()
 const toast = useToast()
 const { addProfile } = useProfileApi()
-const { user, getCurrentUser } = useSupabase()
-getCurrentUser()
+const { user } = useSupabase()
 
 // Store extracted usernames
 const extractedUsernames = ref<Record<number, string | null>>({})
@@ -177,10 +175,8 @@ function handleUrlChange(url: string, index: number): void {
 async function addNewProfile() {
 	isLoading.value = true
 	try {
-		console.log(user.value)
-
 		const profileData = {
-			user_id: user.value?.id,
+			user_id: user.value?.user.id,
 			name: state.name,
 			bio: state.bio,
 			img: state.profileImage || '',
