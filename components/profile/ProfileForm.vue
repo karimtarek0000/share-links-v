@@ -186,16 +186,17 @@ async function addNewProfile() {
 		await addProfile(profileData)
 
 		toast.add({
-			title: 'Profile saved',
+			title: 'Profile saved successfully',
 			description: 'Your profile has been saved',
 			color: 'success',
 			icon: 'i-mdi-check',
 		})
-	} catch (error) {
+	} catch (error: any) {
 		toast.add({
-			title: 'Error saving profile',
+			title: error.message || 'Error saving profile',
 			description: 'Failed to save your profile',
 			color: 'error',
+			icon: 'i-mdi-alert',
 		})
 	} finally {
 		isLoading.value = false
