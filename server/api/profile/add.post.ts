@@ -1,8 +1,12 @@
-import { useServerSupabase } from '@/composables/useServerSupabase'
+import { getAuthenticatedSupabase } from '@/server/utils/supabase'
 import { profileTableSchema } from '@/validation/profileTableSchema'
 
 export default defineEventHandler(async event => {
 	try {
+		// Get authenticated Supabase client using our utility function
+		const { supabase, userId, handleSupabaseError } =
+			await getAuthenticatedSupabase()
+
 		// Get request body
 		const body = await readBody(event)
 
@@ -18,9 +22,13 @@ export default defineEventHandler(async event => {
 
 		const { user_id, name, bio, img, social_links } = result.data
 
-		// Use the server Supabase composable
-		const { getSupabaseClient, handleSupabaseError } = useServerSupabase()
-		const supabase = getSupabaseClient()
+		// Ensure user can only create a profile for themselves
+		if (userId !== user_id) {
+			return createError({
+				statusCode: 403,
+				statusMessage: 'You can only create a profile for yourself',
+			})
+		}
 
 		// Check if profile already exists
 		const { data: existingProfile, error: checkError } = await supabase
@@ -53,6 +61,12 @@ export default defineEventHandler(async event => {
 			.select()
 
 		if (error) {
+			console.error('Supabase insert error:', {
+				message: error.message,
+				code: error.code,
+				details: error.details,
+				hint: error.hint,
+			})
 			return handleSupabaseError(error)
 		}
 
@@ -62,8 +76,11 @@ export default defineEventHandler(async event => {
 		return data[0]
 	} catch (err: any) {
 		return createError({
-			statusCode: 500,
-			statusMessage: err.message || 'An error occurred creating the profile',
+			statusCode: err.statusCode || 500,
+			statusMessage:
+				err.statusMessage ||
+				err.message ||
+				'An error occurred creating the profile',
 		})
 	}
 })
