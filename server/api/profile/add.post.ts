@@ -1,4 +1,4 @@
-import { useServerSupabase } from '~/composables/useServerSupabase'
+import { useServerSupabase } from '@/composables/useServerSupabase'
 import { profileTableSchema } from '@/validation/profileTableSchema'
 
 export default defineEventHandler(async event => {
