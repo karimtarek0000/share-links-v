@@ -2,14 +2,14 @@ import { z } from 'zod'
 
 // Define the profile table schema with Zod
 export const profileTableSchema = z.object({
-	userId: z.string().min(1, 'User ID is required'),
+	user_id: z.string().min(1, 'User ID is required'),
 	name: z.string().min(5, 'Name must be at least 5 characters'),
 	bio: z
 		.string()
 		.min(10, 'Bio must be at least 10 characters')
 		.max(150, 'Bio must be 150 characters or less'),
 	img: z.string().nullable(),
-	socialLinks: z.array(z.string()),
+	social_links: z.array(z.string()),
 })
 
 // Type for Supabase profiles table
