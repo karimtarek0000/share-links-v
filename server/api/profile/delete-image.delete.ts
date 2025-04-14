@@ -1,7 +1,11 @@
-import { useServerSupabase } from '@/composables/useServerSupabase'
+import { getAuthenticatedSupabase } from '@/server/utils/supabase'
 
 export default defineEventHandler(async event => {
 	try {
+		// Get authenticated Supabase client using our utility function
+		const { supabase, userId, handleSupabaseError } =
+			await getAuthenticatedSupabase(event)
+
 		// Get request body
 		const body = await readBody(event)
 		const { user_id, imagePath } = body
@@ -13,16 +17,20 @@ export default defineEventHandler(async event => {
 			})
 		}
 
+		// Ensure user can only delete their own images
+		if (userId !== user_id) {
+			return createError({
+				statusCode: 403,
+				statusMessage: 'You can only delete your own images',
+			})
+		}
+
 		if (!imagePath) {
 			return createError({
 				statusCode: 400,
 				statusMessage: 'Image path is required',
 			})
 		}
-
-		// Use the server Supabase composable
-		const { getSupabaseClient, handleSupabaseError } = useServerSupabase()
-		const supabase = getSupabaseClient()
 
 		// Check if image is a default image
 		if (
@@ -81,8 +89,11 @@ export default defineEventHandler(async event => {
 		}
 	} catch (err: any) {
 		return createError({
-			statusCode: 500,
-			statusMessage: err.message || 'An error occurred deleting the image',
+			statusCode: err.statusCode || 500,
+			statusMessage:
+				err.statusMessage ||
+				err.message ||
+				'An error occurred deleting the image',
 		})
 	}
 })
