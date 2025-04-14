@@ -5,7 +5,7 @@ export default defineEventHandler(async event => {
 	try {
 		// Get authenticated Supabase client using our utility function
 		const { supabase, userId, handleSupabaseError } =
-			await getAuthenticatedSupabase()
+			await getAuthenticatedSupabase(event)
 
 		// Get request body
 		const body = await readBody(event)
@@ -61,12 +61,6 @@ export default defineEventHandler(async event => {
 			.select()
 
 		if (error) {
-			console.error('Supabase insert error:', {
-				message: error.message,
-				code: error.code,
-				details: error.details,
-				hint: error.hint,
-			})
 			return handleSupabaseError(error)
 		}
 
