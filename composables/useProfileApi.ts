@@ -25,12 +25,12 @@ export const useProfileApi = () => {
 		}
 	}
 
-	const getProfile = async (userId: string) => {
+	const getProfile = async (user_id: string) => {
 		try {
 			const data: ApiResponse = await $fetch(`/api/profile/get`, {
 				method: 'GET',
 				params: {
-					userId,
+					user_id,
 				},
 			})
 
@@ -53,12 +53,12 @@ export const useProfileApi = () => {
 		}
 	}
 
-	const uploadProfileImage = async (file: File, userId: string) => {
+	const uploadProfileImage = async (file: File, user_id: string) => {
 		try {
 			// Create a FormData object to send the file
 			const formData = new FormData()
 			formData.append('file', file)
-			formData.append('userId', userId)
+			formData.append('user_id', user_id)
 
 			const data: ApiResponse = await $fetch('/api/profile/upload-image', {
 				method: 'POST',
@@ -71,12 +71,12 @@ export const useProfileApi = () => {
 		}
 	}
 
-	const deleteProfileImage = async (userId: string, imagePath: string) => {
+	const deleteProfileImage = async (user_id: string, imagePath: string) => {
 		try {
 			const data: ApiResponse = await $fetch('/api/profile/delete-image', {
 				method: 'DELETE',
 				body: {
-					userId,
+					user_id,
 					imagePath,
 				},
 			})

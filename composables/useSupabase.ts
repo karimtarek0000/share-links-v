@@ -16,7 +16,7 @@ export const useSupabase = () => {
 	}
 
 	const supabase = createClient(supabaseUrl, supabaseKey)
-	const user = ref(null)
+	const user = ref<any>(null)
 	const loading = ref(false)
 	const error = ref(null)
 
