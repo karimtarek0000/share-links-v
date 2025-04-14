@@ -1,41 +1,89 @@
-import { useServerSupabase } from '@/composables/useServerSupabase'
+import { createClient } from '@supabase/supabase-js'
 import { H3Event } from 'h3'
 
 /**
- * Utility to get an authenticated Supabase client from the server middleware context
+ * Utility to get authenticated Supabase clients from the server middleware context
  * This centralizes the authentication logic for all profile API endpoints
  */
 export async function getAuthenticatedSupabase(event: H3Event) {
-	// Get token from middleware context
-	const token = event.context.supabaseToken
+	try {
+		// Get token from middleware context
+		const token = event.context.supabaseToken
 
-	if (!token) {
-		throw createError({
-			statusCode: 401,
-			statusMessage: 'Authentication token not found in request context',
+		if (!token) {
+			throw createError({
+				statusCode: 401,
+				statusMessage: 'Authentication token not found in request context',
+			})
+		}
+
+		// Get runtime config
+		const config = useRuntimeConfig()
+		const supabaseUrl = config.public.supabaseUrl
+		const supabaseKey = config.public.supabaseKey
+		const serviceRoleKey = config.supabaseServiceKey
+
+		if (!serviceRoleKey) {
+			throw createError({
+				statusCode: 500,
+				statusMessage:
+					'SUPABASE_SERVICE_ROLE_KEY is not defined in environment variables',
+			})
+		}
+
+		// Common client options
+		const clientOptions = {
+			auth: {
+				autoRefreshToken: false,
+				persistSession: false,
+			},
+		}
+
+		// Create authenticated client with user token
+		const supabase = createClient(supabaseUrl, supabaseKey, {
+			...clientOptions,
+			global: {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			},
 		})
-	}
 
-	// Create authenticated Supabase client with the token
-	const { getSupabaseClient, handleSupabaseError } = useServerSupabase()
-	const supabase = getSupabaseClient()
+		// Create admin client with service role key (bypasses RLS)
+		const supabaseAdmin = createClient(
+			supabaseUrl,
+			serviceRoleKey,
+			clientOptions,
+		)
 
-	// Verify the token by getting the user
-	const { data: authData, error: authError } = await supabase.auth.getUser(
-		token,
-	)
+		// Verify the token by getting the user
+		const {
+			data: { user },
+			error: authError,
+		} = await supabase.auth.getUser()
 
-	if (authError) {
-		console.error('Auth error:', authError)
+		if (authError || !user) {
+			throw createError({
+				statusCode: 401,
+				statusMessage: 'Invalid or expired authentication token',
+			})
+		}
+
+		return {
+			supabase,
+			supabaseAdmin,
+			userId: user.id,
+			handleSupabaseError: (error: any) => {
+				return createError({
+					statusCode: error.code === '23505' ? 409 : 500,
+					statusMessage: error.message || 'Database operation failed',
+				})
+			},
+		}
+	} catch (error: any) {
 		throw createError({
-			statusCode: 401,
-			statusMessage: 'Invalid or expired authentication token',
+			statusCode: error.statusCode || 500,
+			statusMessage: error.statusMessage || 'Authentication failed',
 		})
-	}
-
-	return {
-		supabase,
-		userId: authData.user.id,
-		handleSupabaseError,
 	}
 }
