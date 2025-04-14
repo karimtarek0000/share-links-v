@@ -1,17 +1,17 @@
 import { getAuthenticatedSupabase } from '@/server/utils/supabase'
 import { profileTableSchema } from '@/validation/profileTableSchema'
+import { z } from 'zod'
 
 export default defineEventHandler(async event => {
 	try {
 		// Get authenticated Supabase client using our utility function
-		const { supabase, userId, handleSupabaseError } =
+		const { supabase, supabaseAdmin, userId, handleSupabaseError } =
 			await getAuthenticatedSupabase(event)
 
-		// Get request body
+		// Get and validate request body
 		const body = await readBody(event)
-
-		// Validate request body
 		const result = profileTableSchema.safeParse(body)
+
 		if (!result.success) {
 			return createError({
 				statusCode: 400,
@@ -48,33 +48,71 @@ export default defineEventHandler(async event => {
 			})
 		}
 
-		// Insert new profile
-		const { data, error } = await supabase
-			.from('profiles')
-			.insert({
-				user_id,
-				name,
-				bio,
-				img,
-				social_links,
-			})
-			.select()
+		// Create the profile data object
+		const profileData = {
+			user_id,
+			name,
+			bio,
+			img,
+			social_links,
+		}
+
+		// Try with regular authenticated client first
+		const { data, error } = await insertProfile(supabase, profileData)
+
+		// If that fails with RLS error and we have an admin client, try with admin client
+		if (error && isRLSError(error) && supabaseAdmin) {
+			const { data: adminData, error: adminError } = await insertProfile(
+				supabaseAdmin,
+				profileData,
+			)
+
+			if (adminError) {
+				return handleSupabaseError(adminError)
+			}
+
+			// Set status code to 201 for successful creation
+			setResponseStatus(event, 201)
+			return adminData[0]
+		}
 
 		if (error) {
 			return handleSupabaseError(error)
 		}
 
-		// Set status code to 201
+		// Set status code to 201 for successful creation
 		setResponseStatus(event, 201)
-
 		return data[0]
-	} catch (err: any) {
+	} catch (err) {
+		const error = err as Error
 		return createError({
-			statusCode: err.statusCode || 500,
+			statusCode: 'statusCode' in error ? Number(error.statusCode) : 500,
 			statusMessage:
-				err.statusMessage ||
-				err.message ||
-				'An error occurred creating the profile',
+				'statusMessage' in error
+					? String(error.statusMessage)
+					: error.message || 'An error occurred creating the profile',
 		})
 	}
 })
+
+// Helper function to insert profile
+async function insertProfile(
+	client: any,
+	profileData: z.infer<typeof profileTableSchema>,
+) {
+	try {
+		return await client.from('profiles').insert(profileData).select()
+	} catch (e) {
+		console.error('Exception during profile insert:', e)
+		return { data: null, error: e as Error }
+	}
+}
+
+// Helper to check for RLS errors
+function isRLSError(error: any): boolean {
+	return (
+		error.code === '42501' ||
+		(typeof error.message === 'string' &&
+			error.message.includes('violates row-level security'))
+	)
+}
