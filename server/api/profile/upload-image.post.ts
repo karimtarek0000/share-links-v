@@ -22,7 +22,7 @@ export default defineEventHandler(async event => {
 		}
 
 		// Get user ID from form data
-		const userIdField = formData.find(item => item.name === 'userId')
+		const userIdField = formData.find(item => item.name === 'user_id')
 		if (!userIdField || !userIdField.data) {
 			return createError({
 				statusCode: 400,
@@ -30,7 +30,7 @@ export default defineEventHandler(async event => {
 			})
 		}
 
-		const userId = Buffer.from(userIdField.data).toString('utf-8')
+		const user_id = Buffer.from(userIdField.data).toString('utf-8')
 
 		// Check file type and size
 		const fileType = fileData.type || 'application/octet-stream'
@@ -53,7 +53,7 @@ export default defineEventHandler(async event => {
 
 		// Generate a unique filename
 		const fileExtension = fileData.filename.split('.').pop()
-		const uniqueFilename = `${userId}-${Date.now()}.${fileExtension}`
+		const uniqueFilename = `${user_id}-${Date.now()}.${fileExtension}`
 
 		// Use the server Supabase composable
 		const { getSupabaseClient, handleSupabaseError } = useServerSupabase()

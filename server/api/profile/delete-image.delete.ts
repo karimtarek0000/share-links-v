@@ -4,9 +4,9 @@ export default defineEventHandler(async event => {
 	try {
 		// Get request body
 		const body = await readBody(event)
-		const { userId, imagePath } = body
+		const { user_id, imagePath } = body
 
-		if (!userId) {
+		if (!user_id) {
 			return createError({
 				statusCode: 400,
 				statusMessage: 'User ID is required',
@@ -47,7 +47,7 @@ export default defineEventHandler(async event => {
 		const path = pathParts[1]
 
 		// Check if the image belongs to the user (security check)
-		if (!path.startsWith(userId)) {
+		if (!path.startsWith(user_id)) {
 			return createError({
 				statusCode: 403,
 				statusMessage: 'Not authorized to delete this image',
@@ -67,7 +67,7 @@ export default defineEventHandler(async event => {
 		const { error: updateError } = await supabase
 			.from('profiles')
 			.update({ img: null })
-			.eq('userId', userId)
+			.eq('user_id', user_id)
 
 		if (updateError) {
 			return handleSupabaseError(updateError)

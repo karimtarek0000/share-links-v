@@ -4,9 +4,9 @@ export default defineEventHandler(async event => {
 	try {
 		// Get query parameters
 		const query = getQuery(event)
-		const userId = query.userId as string
+		const user_id = query.user_id as string
 
-		if (!userId) {
+		if (!user_id) {
 			return createError({
 				statusCode: 400,
 				statusMessage: 'User ID is required',
@@ -17,11 +17,11 @@ export default defineEventHandler(async event => {
 		const { getSupabaseClient, handleSupabaseError } = useServerSupabase()
 		const supabase = getSupabaseClient()
 
-		// Get profile by userId
+		// Get profile by user_id
 		const { data, error } = await supabase
 			.from('profiles')
 			.select('*')
-			.eq('userId', userId)
+			.eq('user_id', user_id)
 			.single()
 
 		if (error) {

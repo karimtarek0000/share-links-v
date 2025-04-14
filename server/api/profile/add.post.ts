@@ -1,4 +1,4 @@
-import { useServerSupabase } from '@/composables/useServerSupabase'
+import { useServerSupabase } from '~/composables/useServerSupabase'
 import { profileTableSchema } from '@/validation/profileTableSchema'
 
 export default defineEventHandler(async event => {
@@ -16,7 +16,7 @@ export default defineEventHandler(async event => {
 			})
 		}
 
-		const { userId, name, bio, img, socialLinks } = result.data
+		const { user_id, name, bio, img, social_links } = result.data
 
 		// Use the server Supabase composable
 		const { getSupabaseClient, handleSupabaseError } = useServerSupabase()
@@ -25,8 +25,8 @@ export default defineEventHandler(async event => {
 		// Check if profile already exists
 		const { data: existingProfile, error: checkError } = await supabase
 			.from('profiles')
-			.select('userId')
-			.eq('userId', userId)
+			.select('user_id')
+			.eq('user_id', user_id)
 			.single()
 
 		if (checkError && checkError.code !== 'PGRST116') {
@@ -44,11 +44,11 @@ export default defineEventHandler(async event => {
 		const { data, error } = await supabase
 			.from('profiles')
 			.insert({
-				userId,
+				user_id,
 				name,
 				bio,
 				img,
-				socialLinks,
+				social_links,
 			})
 			.select()
 
@@ -56,10 +56,10 @@ export default defineEventHandler(async event => {
 			return handleSupabaseError(error)
 		}
 
-		return {
-			statusCode: 201,
-			body: data[0],
-		}
+		// Set status code to 201
+		setResponseStatus(event, 201)
+
+		return data[0]
 	} catch (err: any) {
 		return createError({
 			statusCode: 500,

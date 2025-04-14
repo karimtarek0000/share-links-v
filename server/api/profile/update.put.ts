@@ -16,7 +16,7 @@ export default defineEventHandler(async event => {
 			})
 		}
 
-		const { userId, name, bio, img, socialLinks } = result.data
+		const { user_id, name, bio, img, social_links } = result.data
 
 		// Use the server Supabase composable
 		const { getSupabaseClient, handleSupabaseError } = useServerSupabase()
@@ -25,8 +25,8 @@ export default defineEventHandler(async event => {
 		// Check if profile exists before updating
 		const { data: existingProfile, error: checkError } = await supabase
 			.from('profiles')
-			.select('userId')
-			.eq('userId', userId)
+			.select('user_id')
+			.eq('user_id', user_id)
 			.single()
 
 		if (checkError) {
@@ -47,9 +47,9 @@ export default defineEventHandler(async event => {
 				name,
 				bio,
 				img,
-				socialLinks,
+				social_links,
 			})
-			.eq('userId', userId)
+			.eq('user_id', user_id)
 			.select()
 
 		if (error) {
