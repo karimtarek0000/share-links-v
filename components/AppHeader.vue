@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const { logout } = useAuthApi()
 const toast = useToast()
+const { user } = useSupabase()
 
 // State for the component
 const shareableLink = ref(
@@ -37,6 +38,7 @@ const dropdownItems = [
 		onSelect: async () => {
 			try {
 				await logout()
+				user.value = null
 
 				toast.add({
 					title: 'Logout successful!',
