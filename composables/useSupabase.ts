@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 import { ref } from 'vue'
 
+const user = ref<any>(null)
+
 // Create a single supabase client for interacting with your database
 export const useSupabase = () => {
 	// Get runtime config to access environment variables
@@ -11,12 +13,10 @@ export const useSupabase = () => {
 	const supabaseKey = config.public.supabaseKey
 
 	if (!supabaseUrl || !supabaseKey) {
-		console.error('Supabase URL or Key is missing')
 		throw new Error('Supabase configuration is incomplete')
 	}
 
 	const supabase = createClient(supabaseUrl, supabaseKey)
-	const user = ref<any>(null)
 	const loading = ref(false)
 	const error = ref(null)
 
@@ -32,7 +32,7 @@ export const useSupabase = () => {
 			}
 
 			if (data?.session?.user) {
-				user.value = data.session.user
+				user.value = data.session
 				return user.value
 			} else {
 				user.value = null
