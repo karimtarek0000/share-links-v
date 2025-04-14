@@ -26,6 +26,9 @@ const isLoading = ref(false)
 // Get platform detection and toast
 const { detectPlatform, extractUsername } = useSocialPlatforms()
 const toast = useToast()
+const { addProfile } = useProfileApi()
+const { user, getCurrentUser } = useSupabase()
+getCurrentUser()
 
 // Store extracted usernames
 const extractedUsernames = ref<Record<number, string | null>>({})
@@ -171,28 +174,41 @@ function handleUrlChange(url: string, index: number): void {
 	extractedUsernames.value[index] = extractUsername(url, platform)
 }
 
-// Form submission handler
-async function onSubmit(event: FormSubmitEvent<UserData>) {
+async function addNewProfile() {
 	isLoading.value = true
-
 	try {
-		// Simulate API call
-		await new Promise(resolve => setTimeout(resolve, 1000))
+		console.log(user.value)
+
+		const profileData = {
+			user_id: user.value?.id,
+			name: state.name,
+			bio: state.bio,
+			img: state.profileImage || '',
+			social_links: state.socials.map(social => social.url),
+		}
+
+		await addProfile(profileData)
+
 		toast.add({
-			title: 'Success!',
+			title: 'Profile saved',
 			description: 'Your profile has been saved',
 			color: 'success',
 			icon: 'i-mdi-check',
 		})
 	} catch (error) {
 		toast.add({
-			title: 'Error',
+			title: 'Error saving profile',
 			description: 'Failed to save your profile',
 			color: 'error',
 		})
 	} finally {
 		isLoading.value = false
 	}
+}
+
+// TODO: Form submission handler
+async function onSubmit() {
+	addNewProfile()
 }
 
 // Make userData available to parent components
