@@ -26,4 +26,8 @@ export default defineEventHandler(async event => {
 			statusMessage: 'Unauthorized: Missing or invalid authentication token',
 		})
 	}
+
+	// Store the token in event context for easy access in API handlers
+	const token = authHeader.split(' ')[1]
+	event.context.supabaseToken = token
 })
