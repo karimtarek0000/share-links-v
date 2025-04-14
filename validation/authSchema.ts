@@ -71,7 +71,9 @@ export type ValidationError = {
 }
 
 // Define validation function for login form
-export const validateLogin = (state: any): ValidationError[] => {
+export const validateLogin = (
+	state: z.infer<typeof loginSchema>,
+): ValidationError[] => {
 	const errors: ValidationError[] = []
 
 	const result = loginSchema.safeParse(state)
@@ -90,7 +92,9 @@ export const validateLogin = (state: any): ValidationError[] => {
 }
 
 // Define validation function for signup form
-export const validateSignup = (state: any): ValidationError[] => {
+export const validateSignup = (
+	state: z.infer<typeof signupSchema>,
+): ValidationError[] => {
 	const errors: ValidationError[] = []
 
 	const result = signupSchema.safeParse(state)
@@ -109,7 +113,9 @@ export const validateSignup = (state: any): ValidationError[] => {
 }
 
 // Define validation function for forgot password form
-export const validateForgotPassword = (state: any): ValidationError[] => {
+export const validateForgotPassword = (
+	state: z.infer<typeof forgotPasswordSchema>,
+): ValidationError[] => {
 	const errors: ValidationError[] = []
 
 	const result = forgotPasswordSchema.safeParse(state)
@@ -128,7 +134,9 @@ export const validateForgotPassword = (state: any): ValidationError[] => {
 }
 
 // Define validation function for reset password form
-export const validateResetPassword = (state: any): ValidationError[] => {
+export const validateResetPassword = (
+	state: z.infer<typeof resetPasswordSchema>,
+): ValidationError[] => {
 	const errors: ValidationError[] = []
 
 	const result = resetPasswordSchema.safeParse(state)
