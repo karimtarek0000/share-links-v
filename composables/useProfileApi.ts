@@ -19,7 +19,11 @@ export const useProfileApi = () => {
 		const { data } = await supabase.auth.getSession()
 
 		if (!data.session?.access_token) {
-			throw new Error('User not authenticated')
+			throw createError({
+				statusCode: 401,
+				message: 'User not authenticated',
+				name: 'AuthenticationError',
+			})
 		}
 
 		return {
