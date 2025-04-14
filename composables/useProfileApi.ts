@@ -8,6 +8,7 @@ interface ApiResponse {
 				message?: string
 		  }
 		| ProfileTable
+		| { path: string; publicUrl: string }
 }
 
 export const useProfileApi = () => {
@@ -52,9 +53,45 @@ export const useProfileApi = () => {
 		}
 	}
 
+	const uploadProfileImage = async (file: File, userId: string) => {
+		try {
+			// Create a FormData object to send the file
+			const formData = new FormData()
+			formData.append('file', file)
+			formData.append('userId', userId)
+
+			const data: ApiResponse = await $fetch('/api/profile/upload-image', {
+				method: 'POST',
+				body: formData,
+			})
+
+			return data
+		} catch (err: any) {
+			return Promise.reject(err.response._data)
+		}
+	}
+
+	const deleteProfileImage = async (userId: string, imagePath: string) => {
+		try {
+			const data: ApiResponse = await $fetch('/api/profile/delete-image', {
+				method: 'DELETE',
+				body: {
+					userId,
+					imagePath,
+				},
+			})
+
+			return data
+		} catch (err: any) {
+			return Promise.reject(err.response._data)
+		}
+	}
+
 	return {
 		addProfile,
 		getProfile,
 		updateProfile,
+		uploadProfileImage,
+		deleteProfileImage,
 	}
 }
