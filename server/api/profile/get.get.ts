@@ -1,7 +1,10 @@
-import { useServerSupabase } from '@/composables/useServerSupabase'
+import { getAuthenticatedSupabase } from '@/server/utils/supabase'
 
 export default defineEventHandler(async event => {
 	try {
+		// Get authenticated Supabase client using our utility function
+		const { supabase, handleSupabaseError } = await getAuthenticatedSupabase()
+
 		// Get query parameters
 		const query = getQuery(event)
 		const user_id = query.user_id as string
@@ -12,10 +15,6 @@ export default defineEventHandler(async event => {
 				statusMessage: 'User ID is required',
 			})
 		}
-
-		// Use the server Supabase composable
-		const { getSupabaseClient, handleSupabaseError } = useServerSupabase()
-		const supabase = getSupabaseClient()
 
 		// Get profile by user_id
 		const { data, error } = await supabase
@@ -41,8 +40,11 @@ export default defineEventHandler(async event => {
 		}
 	} catch (err: any) {
 		return createError({
-			statusCode: 500,
-			statusMessage: err.message || 'An error occurred retrieving the profile',
+			statusCode: err.statusCode || 500,
+			statusMessage:
+				err.statusMessage ||
+				err.message ||
+				'An error occurred retrieving the profile',
 		})
 	}
 })
