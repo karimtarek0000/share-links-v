@@ -80,7 +80,7 @@ const validateField = (fieldName: string) => {
 }
 
 // Image Handling Methods
-async function onImageSelected(event: Event): void {
+async function onImageSelected(event: Event) {
 	const target = event.target as HTMLInputElement
 	const file = target.files?.[0]
 
