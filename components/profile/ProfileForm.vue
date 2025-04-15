@@ -21,11 +21,12 @@ const fieldsToValidate = ref<Set<string>>(new Set())
 const fileInput = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
 const isLoading = ref(false)
+const id = ref(null)
 
 // Get platform detection and toast
 const { detectPlatform, extractUsername } = useSocialPlatforms()
 const toast = useToast()
-const { addProfile, getProfile } = useProfileApi()
+const { addProfile, getProfile, updateProfile } = useProfileApi()
 const { user } = useSupabase()
 
 // Store extracted usernames
@@ -41,6 +42,15 @@ const isFormValid = computed(() => {
 	const result = profileSchema.safeParse(state)
 	return result.success
 })
+
+// Payload for the profile data
+const profileData = computed(() => ({
+	user_id: user.value?.user.id,
+	name: state.name,
+	bio: state.bio,
+	img: state.profileImage || '',
+	social_links: state.socials.map(social => social.url),
+}))
 
 // -----------------------------
 // Methods
@@ -183,6 +193,8 @@ function handleUrlChange(url: string, index: number): void {
 			url: link,
 			icon: detectPlatform(link).icon,
 		}))
+
+		id.value = body.id
 	} catch (error: any) {
 		toast.add({
 			title: error.message || 'Error fetching profile data',
@@ -196,15 +208,7 @@ function handleUrlChange(url: string, index: number): void {
 async function addNewProfile() {
 	isLoading.value = true
 	try {
-		const profileData = {
-			user_id: user.value?.user.id,
-			name: state.name,
-			bio: state.bio,
-			img: state.profileImage || '',
-			social_links: state.socials.map(social => social.url),
-		}
-
-		await addProfile(profileData)
+		await addProfile(profileData.value)
 
 		toast.add({
 			title: 'Profile saved successfully',
@@ -223,9 +227,31 @@ async function addNewProfile() {
 		isLoading.value = false
 	}
 }
+async function updateDataProfile() {
+	isLoading.value = true
+	try {
+		await updateProfile(profileData.value)
+
+		toast.add({
+			title: 'Profile updated successfully',
+			description: 'Your profile has been updated',
+			color: 'success',
+			icon: 'i-mdi-check',
+		})
+	} catch (error: any) {
+		toast.add({
+			title: error.message || 'Error updating profile',
+			description: 'Failed to update your profile',
+			color: 'error',
+			icon: 'i-mdi-alert',
+		})
+	} finally {
+		isLoading.value = false
+	}
+}
 // Form submission handler
 async function onSubmit() {
-	addNewProfile()
+	id.value ? updateDataProfile() : addNewProfile()
 }
 
 // Make userData available to parent components
