@@ -18,7 +18,6 @@ export default defineEventHandler(async event => {
 			.remove([path])
 
 		if (deleteError) {
-			console.error('Error deleting image:', deleteError)
 			return handleSupabaseError(deleteError)
 		}
 
@@ -82,31 +81,32 @@ function validateRequestData(
 	}
 }
 
-function extractImagePath(imagePath: string, userId: string) {
-	let path = ''
-
-	if (imagePath.includes('profile-images/')) {
-		const pathParts = imagePath.split('profile-images/')
-		if (pathParts.length > 1) {
-			path = pathParts[1]
-		}
-	} else {
-		path = imagePath
-	}
-
-	if (!path) {
+function extractImagePath(imagePath: string, userId: string): string {
+	// Validate path is not empty
+	if (!imagePath) {
 		throw createError({
 			statusCode: 400,
 			statusMessage: 'Invalid image path format',
 		})
 	}
 
-	if (!path.startsWith(userId) && !path.includes(userId)) {
-		throw createError({
-			statusCode: 403,
-			statusMessage: 'Not authorized to delete this image',
-		})
+	// Path already in correct format: userId/filename
+	if (imagePath.startsWith(`${userId}/`)) {
+		return imagePath
 	}
 
-	return path
+	// Try to extract filename if userId is in the path
+	if (imagePath.includes(userId)) {
+		const parts = imagePath.split(userId)
+		if (parts.length > 1) {
+			const filename = parts[1].replace(/^[\/\-]/, '')
+			return `${userId}/${filename}`
+		}
+	}
+
+	// Not authorized if we can't create a valid path
+	throw createError({
+		statusCode: 403,
+		statusMessage: 'Not authorized to delete this image',
+	})
 }
