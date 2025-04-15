@@ -30,32 +30,33 @@ function copyToClipboard() {
 	}
 }
 
+async function logOutHandler() {
+	try {
+		await logout()
+		user.value = null
+
+		toast.add({
+			title: 'Logout successful!',
+			color: 'success',
+			icon: 'i-heroicons-check-circle',
+		})
+
+		navigateTo('/auth/login')
+	} catch (error: any) {
+		toast.add({
+			title: error.message,
+			description: 'Please try again later.',
+			color: 'error',
+			icon: 'i-heroicons-exclamation-circle',
+		})
+	}
+}
 // Dropdown items with proper navigation
 const dropdownItems = [
 	{
 		label: 'Log out',
 		icon: 'i-heroicons-arrow-right-on-rectangle',
-		onSelect: async () => {
-			try {
-				await logout()
-				user.value = null
-
-				toast.add({
-					title: 'Logout successful!',
-					color: 'success',
-					icon: 'i-heroicons-check-circle',
-				})
-
-				navigateTo('/auth/login')
-			} catch (error: any) {
-				toast.add({
-					title: error.message,
-					description: 'Please try again later.',
-					color: 'error',
-					icon: 'i-heroicons-exclamation-circle',
-				})
-			}
-		},
+		onSelect: logOutHandler,
 	},
 ]
 </script>
