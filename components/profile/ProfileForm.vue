@@ -361,7 +361,7 @@ defineExpose({ userData: state })
 				>
 					<div class="flex items-center space-x-4">
 						<div
-							class="w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border relative group"
+							class="w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border relative"
 							:class="state.profileImage ? 'border-primary' : 'border-gray-300'"
 						>
 							<img
@@ -378,7 +378,10 @@ defineExpose({ userData: state })
 							<!-- Hover overlay -->
 							<div
 								v-if="state.profileImage"
-								class="absolute inset-0 bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+								class="absolute inset-0 bg-black/70 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+								:class="{
+									'pointer-events-none !opacity-0': isLoading,
+								}"
 								@click="removeProfileImage"
 							>
 								<UIcon name="i-mdi-trash" class="text-white text-xl" />
@@ -390,6 +393,9 @@ defineExpose({ userData: state })
 								color="primary"
 								variant="soft"
 								icon="i-mdi-upload"
+								:class="{
+									'pointer-events-none': isLoading,
+								}"
 								@click="fileInput?.click()"
 							>
 								Upload Image
