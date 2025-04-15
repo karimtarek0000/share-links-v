@@ -19,16 +19,21 @@ const fieldsToValidate = ref<Set<string>>(new Set())
 
 // File upload state
 const fileInput = ref<HTMLInputElement | null>(null)
+const imgFile = ref<File | null>(null)
+const userId = ref(null)
 const isDragging = ref(false)
 const isLoading = ref(false)
-const imgFile = ref<File | null>(null)
-const id = ref(null)
 
 // Get platform detection and toast
 const { detectPlatform, extractUsername } = useSocialPlatforms()
 const toast = useToast()
-const { addProfile, getProfile, updateProfile, uploadProfileImage } =
-	useProfileApi()
+const {
+	addProfile,
+	getProfile,
+	updateProfile,
+	uploadProfileImage,
+	deleteProfileImage,
+} = useProfileApi()
 const { user } = useSupabase()
 
 // Store extracted usernames
@@ -43,6 +48,13 @@ const isFormValid = computed(() => {
 	// Directly use profileSchema to validate the entire form
 	const result = profileSchema.safeParse(state)
 	return result.success
+})
+
+// Get the file name from the profile image URL
+const pathImg = computed(() => {
+	if (!state.profileImage) return null
+	const parts = state.profileImage.split('/')
+	return `${parts[parts.length - 2]}-${parts[parts.length - 1]}`
 })
 
 // Payload for the profile data
@@ -144,10 +156,11 @@ function onDrop(event: DragEvent): void {
 	}
 }
 
-function removeProfileImage(): void {
+async function removeProfileImage() {
 	if (state.profileImage && state.profileImage.startsWith('blob:')) {
 		URL.revokeObjectURL(state.profileImage)
 	}
+	await deleteImgProfile()
 	imgFile.value = null
 	state.profileImage = null
 }
@@ -189,30 +202,7 @@ function handleUrlChange(url: string, index: number): void {
 	extractedUsernames.value[index] = extractUsername(url, platform)
 }
 
-;(async () => {
-	try {
-		const { body } = await getProfile(user.value?.user.id)
-		state.name = body.name || ''
-		state.bio = body.bio || ''
-		state.profileImage = body.img || null
-		state.socials = body.social_links.map((link: string) => ({
-			platform: detectPlatform(link).platform,
-			url: link,
-			icon: detectPlatform(link).icon,
-		}))
-
-		id.value = body.id
-		user.value.img = body.img
-	} catch (error: any) {
-		toast.add({
-			title: error.message || 'Error fetching profile data',
-			description: 'Failed to retrieve your profile data',
-			color: 'error',
-			icon: 'i-mdi-alert',
-		})
-	}
-})()
-
+// Upload and Delete Image Methods
 async function uploadImgProfile() {
 	isLoading.value = true
 	try {
@@ -223,7 +213,6 @@ async function uploadImgProfile() {
 
 		state.profileImage = body.publicUrl
 		user.value.img = body.publicUrl
-
 		toast.add({
 			title: 'Profile image uploaded successfully',
 			description: 'Your profile image has been uploaded',
@@ -234,6 +223,30 @@ async function uploadImgProfile() {
 		toast.add({
 			title: error.message || 'Error uploading image',
 			description: 'Failed to upload your profile image',
+			color: 'error',
+			icon: 'i-mdi-alert',
+		})
+	} finally {
+		isLoading.value = false
+	}
+}
+
+async function deleteImgProfile() {
+	isLoading.value = true
+	try {
+		await deleteProfileImage(user.value?.user.id, pathImg.value as string)
+
+		state.profileImage = null
+		toast.add({
+			title: 'Profile image deleted successfully',
+			description: 'Your profile image has been deleted',
+			color: 'success',
+			icon: 'i-mdi-check',
+		})
+	} catch (error: any) {
+		toast.add({
+			title: error.message || 'Error deleting image',
+			description: 'Failed to delete your profile image',
 			color: 'error',
 			icon: 'i-mdi-alert',
 		})
@@ -287,11 +300,34 @@ async function updateDataProfile() {
 }
 // Form submission handler
 async function onSubmit() {
-	id.value ? updateDataProfile() : addNewProfile()
+	userId.value ? updateDataProfile() : addNewProfile()
 }
 
 // Make userData available to parent components
 defineExpose({ userData: state })
+;(async () => {
+	try {
+		const { body } = await getProfile(user.value?.user.id)
+		state.name = body.name || ''
+		state.bio = body.bio || ''
+		state.profileImage = body.img || null
+		state.socials = body.social_links.map((link: string) => ({
+			platform: detectPlatform(link).platform,
+			url: link,
+			icon: detectPlatform(link).icon,
+		}))
+
+		userId.value = body.id
+		user.value.img = body.img
+	} catch (error: any) {
+		toast.add({
+			title: error.message || 'Error fetching profile data',
+			description: 'Failed to retrieve your profile data',
+			color: 'error',
+			icon: 'i-mdi-alert',
+		})
+	}
+})()
 </script>
 
 <template>
@@ -338,7 +374,6 @@ defineExpose({ userData: state })
 								name="i-mdi-account"
 								class="text-gray-400 text-3xl"
 							/>
-
 							<!-- Hover overlay -->
 							<div
 								v-if="state.profileImage"
@@ -572,7 +607,7 @@ defineExpose({ userData: state })
 					:disabled="isLoading || !isFormValid"
 				>
 					<UIcon name="i-mdi-check" class="mr-1" />
-					{{ id ? 'Update Profile' : 'Create Profile' }}
+					{{ userId ? 'Update Profile' : 'Create Profile' }}
 				</UButton>
 			</template>
 		</UCard>
