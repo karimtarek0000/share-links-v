@@ -202,6 +202,7 @@ function handleUrlChange(url: string, index: number): void {
 		}))
 
 		id.value = body.id
+		user.value.img = body.img
 	} catch (error: any) {
 		toast.add({
 			title: error.message || 'Error fetching profile data',
@@ -221,6 +222,7 @@ async function uploadImgProfile() {
 		)
 
 		state.profileImage = body.publicUrl
+		user.value.img = body.publicUrl
 
 		toast.add({
 			title: 'Profile image uploaded successfully',
