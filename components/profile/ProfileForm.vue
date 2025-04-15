@@ -80,7 +80,7 @@ const validateField = (fieldName: string) => {
 }
 
 // Image Handling Methods
-function onImageSelected(event: Event): void {
+async function onImageSelected(event: Event): void {
 	const target = event.target as HTMLInputElement
 	const file = target.files?.[0]
 
@@ -115,8 +115,10 @@ function onImageSelected(event: Event): void {
 		}
 
 		imgFile.value = file
-
 		state.profileImage = URL.createObjectURL(file)
+
+		await uploadImgProfile()
+		await updateDataProfile()
 	}
 }
 
@@ -213,18 +215,23 @@ function handleUrlChange(url: string, index: number): void {
 async function uploadImgProfile() {
 	isLoading.value = true
 	try {
-		await uploadProfileImage(profileData.value)
+		const { body } = await uploadProfileImage(
+			imgFile.value as File,
+			user.value?.user.id,
+		)
+
+		state.profileImage = body.publicUrl
 
 		toast.add({
-			title: 'Profile saved successfully',
-			description: 'Your profile has been saved',
+			title: 'Profile image uploaded successfully',
+			description: 'Your profile image has been uploaded',
 			color: 'success',
 			icon: 'i-mdi-check',
 		})
 	} catch (error: any) {
 		toast.add({
-			title: error.message || 'Error saving profile',
-			description: 'Failed to save your profile',
+			title: error.message || 'Error uploading image',
+			description: 'Failed to upload your profile image',
 			color: 'error',
 			icon: 'i-mdi-alert',
 		})
