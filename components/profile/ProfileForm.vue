@@ -21,12 +21,14 @@ const fieldsToValidate = ref<Set<string>>(new Set())
 const fileInput = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
 const isLoading = ref(false)
+const imgFile = ref<File | null>(null)
 const id = ref(null)
 
 // Get platform detection and toast
 const { detectPlatform, extractUsername } = useSocialPlatforms()
 const toast = useToast()
-const { addProfile, getProfile, updateProfile } = useProfileApi()
+const { addProfile, getProfile, updateProfile, uploadProfileImage } =
+	useProfileApi()
 const { user } = useSupabase()
 
 // Store extracted usernames
@@ -112,6 +114,8 @@ function onImageSelected(event: Event): void {
 			URL.revokeObjectURL(state.profileImage)
 		}
 
+		imgFile.value = file
+
 		state.profileImage = URL.createObjectURL(file)
 	}
 }
@@ -142,6 +146,7 @@ function removeProfileImage(): void {
 	if (state.profileImage && state.profileImage.startsWith('blob:')) {
 		URL.revokeObjectURL(state.profileImage)
 	}
+	imgFile.value = null
 	state.profileImage = null
 }
 
@@ -205,6 +210,28 @@ function handleUrlChange(url: string, index: number): void {
 	}
 })()
 
+async function uploadImgProfile() {
+	isLoading.value = true
+	try {
+		await uploadProfileImage(profileData.value)
+
+		toast.add({
+			title: 'Profile saved successfully',
+			description: 'Your profile has been saved',
+			color: 'success',
+			icon: 'i-mdi-check',
+		})
+	} catch (error: any) {
+		toast.add({
+			title: error.message || 'Error saving profile',
+			description: 'Failed to save your profile',
+			color: 'error',
+			icon: 'i-mdi-alert',
+		})
+	} finally {
+		isLoading.value = false
+	}
+}
 async function addNewProfile() {
 	isLoading.value = true
 	try {
