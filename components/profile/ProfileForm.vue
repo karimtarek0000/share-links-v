@@ -536,7 +536,7 @@ defineExpose({ userData: state })
 					:disabled="isLoading || !isFormValid"
 				>
 					<UIcon name="i-mdi-check" class="mr-1" />
-					Save Profile
+					{{ id ? 'Update Profile' : 'Create Profile' }}
 				</UButton>
 			</template>
 		</UCard>
