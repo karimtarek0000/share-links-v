@@ -88,9 +88,15 @@ const dropdownItems = [
 								class="size-12 rounded-full flex items-center justify-center"
 							>
 								<UAvatar
-									src="https://i.pravatar.cc/100"
+									v-if="user.img"
+									:src="user.img"
 									alt="User profile"
 									size="xl"
+								/>
+								<UIcon
+									v-else
+									name="i-mdi-account"
+									class="text-gray-400 text-3xl"
 								/>
 							</div>
 						</UButton>
