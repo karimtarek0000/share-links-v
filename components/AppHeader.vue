@@ -6,7 +6,7 @@ const { user } = useSupabase()
 // State for the component
 const shareableLink = ref(
 	typeof window !== 'undefined'
-		? `${window.location.origin}/profile/dhdksd01215`
+		? `${window.location.origin}/profile/${user.value?.user.id}`
 		: '',
 )
 const copied = ref(false)
