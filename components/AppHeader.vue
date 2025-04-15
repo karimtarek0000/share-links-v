@@ -6,7 +6,7 @@ const { user } = useSupabase()
 // State for the component
 const shareableLink = ref(
 	typeof window !== 'undefined'
-		? `${window.location.origin}/profile/dhdksd01215`
+		? `${window.location.origin}/profile/${user.value?.user.id}`
 		: '',
 )
 const copied = ref(false)
@@ -30,32 +30,33 @@ function copyToClipboard() {
 	}
 }
 
+async function logOutHandler() {
+	try {
+		await logout()
+		user.value = null
+
+		toast.add({
+			title: 'Logout successful!',
+			color: 'success',
+			icon: 'i-heroicons-check-circle',
+		})
+
+		navigateTo('/auth/login')
+	} catch (error: any) {
+		toast.add({
+			title: error.message,
+			description: 'Please try again later.',
+			color: 'error',
+			icon: 'i-heroicons-exclamation-circle',
+		})
+	}
+}
 // Dropdown items with proper navigation
 const dropdownItems = [
 	{
 		label: 'Log out',
 		icon: 'i-heroicons-arrow-right-on-rectangle',
-		onSelect: async () => {
-			try {
-				await logout()
-				user.value = null
-
-				toast.add({
-					title: 'Logout successful!',
-					color: 'success',
-					icon: 'i-heroicons-check-circle',
-				})
-
-				navigateTo('/auth/login')
-			} catch (error: any) {
-				toast.add({
-					title: error.message,
-					description: 'Please try again later.',
-					color: 'error',
-					icon: 'i-heroicons-exclamation-circle',
-				})
-			}
-		},
+		onSelect: logOutHandler,
 	},
 ]
 </script>
@@ -88,9 +89,15 @@ const dropdownItems = [
 								class="size-12 rounded-full flex items-center justify-center"
 							>
 								<UAvatar
-									src="https://i.pravatar.cc/100"
+									v-if="user.img"
+									:src="user.img"
 									alt="User profile"
 									size="xl"
+								/>
+								<UIcon
+									v-else
+									name="i-mdi-account"
+									class="text-gray-400 text-3xl"
 								/>
 							</div>
 						</UButton>

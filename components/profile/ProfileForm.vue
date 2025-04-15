@@ -19,14 +19,21 @@ const fieldsToValidate = ref<Set<string>>(new Set())
 
 // File upload state
 const fileInput = ref<HTMLInputElement | null>(null)
+const imgFile = ref<File | null>(null)
+const userId = ref(null)
 const isDragging = ref(false)
 const isLoading = ref(false)
-const id = ref(null)
 
 // Get platform detection and toast
 const { detectPlatform, extractUsername } = useSocialPlatforms()
 const toast = useToast()
-const { addProfile, getProfile, updateProfile } = useProfileApi()
+const {
+	addProfile,
+	getProfile,
+	updateProfile,
+	uploadProfileImage,
+	deleteProfileImage,
+} = useProfileApi()
 const { user } = useSupabase()
 
 // Store extracted usernames
@@ -41,6 +48,13 @@ const isFormValid = computed(() => {
 	// Directly use profileSchema to validate the entire form
 	const result = profileSchema.safeParse(state)
 	return result.success
+})
+
+// Get the file name from the profile image URL
+const pathImg = computed(() => {
+	if (!state.profileImage) return null
+	const parts = state.profileImage.split('/')
+	return `${parts[parts.length - 2]}-${parts[parts.length - 1]}`
 })
 
 // Payload for the profile data
@@ -78,7 +92,7 @@ const validateField = (fieldName: string) => {
 }
 
 // Image Handling Methods
-function onImageSelected(event: Event): void {
+async function onImageSelected(event: Event) {
 	const target = event.target as HTMLInputElement
 	const file = target.files?.[0]
 
@@ -112,7 +126,11 @@ function onImageSelected(event: Event): void {
 			URL.revokeObjectURL(state.profileImage)
 		}
 
+		imgFile.value = file
 		state.profileImage = URL.createObjectURL(file)
+
+		await uploadImgProfile()
+		await updateDataProfile()
 	}
 }
 
@@ -138,11 +156,11 @@ function onDrop(event: DragEvent): void {
 	}
 }
 
-function removeProfileImage(): void {
+async function removeProfileImage() {
 	if (state.profileImage && state.profileImage.startsWith('blob:')) {
 		URL.revokeObjectURL(state.profileImage)
 	}
-	state.profileImage = null
+	await deleteImgProfile()
 }
 
 // Social Links Methods
@@ -182,29 +200,61 @@ function handleUrlChange(url: string, index: number): void {
 	extractedUsernames.value[index] = extractUsername(url, platform)
 }
 
-;(async () => {
+// Upload and Delete Image Methods
+async function uploadImgProfile() {
+	isLoading.value = true
 	try {
-		const { body } = await getProfile(user.value?.user.id)
-		state.name = body.name || ''
-		state.bio = body.bio || ''
-		state.profileImage = body.img || null
-		state.socials = body.social_links.map((link: string) => ({
-			platform: detectPlatform(link).platform,
-			url: link,
-			icon: detectPlatform(link).icon,
-		}))
+		const { body } = await uploadProfileImage(
+			imgFile.value as File,
+			user.value?.user.id,
+		)
 
-		id.value = body.id
+		state.profileImage = body.publicUrl
+		user.value.img = body.publicUrl
+		toast.add({
+			title: 'Profile image uploaded successfully',
+			description: 'Your profile image has been uploaded',
+			color: 'success',
+			icon: 'i-mdi-check',
+		})
 	} catch (error: any) {
 		toast.add({
-			title: error.message || 'Error fetching profile data',
-			description: 'Failed to retrieve your profile data',
+			title: error.message || 'Error uploading image',
+			description: 'Failed to upload your profile image',
 			color: 'error',
 			icon: 'i-mdi-alert',
 		})
+	} finally {
+		isLoading.value = false
 	}
-})()
+}
 
+async function deleteImgProfile() {
+	isLoading.value = true
+	try {
+		await deleteProfileImage(user.value?.user.id, pathImg.value as string)
+
+		imgFile.value = null
+		state.profileImage = null
+		user.value.img = null
+
+		toast.add({
+			title: 'Profile image deleted successfully',
+			description: 'Your profile image has been deleted',
+			color: 'success',
+			icon: 'i-mdi-check',
+		})
+	} catch (error: any) {
+		toast.add({
+			title: error.message || 'Error deleting image',
+			description: 'Failed to delete your profile image',
+			color: 'error',
+			icon: 'i-mdi-alert',
+		})
+	} finally {
+		isLoading.value = false
+	}
+}
 async function addNewProfile() {
 	isLoading.value = true
 	try {
@@ -251,11 +301,34 @@ async function updateDataProfile() {
 }
 // Form submission handler
 async function onSubmit() {
-	id.value ? updateDataProfile() : addNewProfile()
+	userId.value ? updateDataProfile() : addNewProfile()
 }
 
 // Make userData available to parent components
 defineExpose({ userData: state })
+;(async () => {
+	try {
+		const { body } = await getProfile(user.value?.user.id)
+		state.name = body.name || ''
+		state.bio = body.bio || ''
+		state.profileImage = body.img || null
+		state.socials = body.social_links.map((link: string) => ({
+			platform: detectPlatform(link).platform,
+			url: link,
+			icon: detectPlatform(link).icon,
+		}))
+
+		userId.value = body.id
+		user.value.img = body.img
+	} catch (error: any) {
+		toast.add({
+			title: error.message || 'Error fetching profile data',
+			description: 'Failed to retrieve your profile data',
+			color: 'error',
+			icon: 'i-mdi-alert',
+		})
+	}
+})()
 </script>
 
 <template>
@@ -288,7 +361,7 @@ defineExpose({ userData: state })
 				>
 					<div class="flex items-center space-x-4">
 						<div
-							class="w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border relative group"
+							class="w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border relative"
 							:class="state.profileImage ? 'border-primary' : 'border-gray-300'"
 						>
 							<img
@@ -302,11 +375,13 @@ defineExpose({ userData: state })
 								name="i-mdi-account"
 								class="text-gray-400 text-3xl"
 							/>
-
 							<!-- Hover overlay -->
 							<div
 								v-if="state.profileImage"
-								class="absolute inset-0 bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+								class="absolute inset-0 bg-black/70 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+								:class="{
+									'pointer-events-none !opacity-0': isLoading,
+								}"
 								@click="removeProfileImage"
 							>
 								<UIcon name="i-mdi-trash" class="text-white text-xl" />
@@ -318,6 +393,9 @@ defineExpose({ userData: state })
 								color="primary"
 								variant="soft"
 								icon="i-mdi-upload"
+								:class="{
+									'pointer-events-none': isLoading,
+								}"
 								@click="fileInput?.click()"
 							>
 								Upload Image
@@ -536,7 +614,7 @@ defineExpose({ userData: state })
 					:disabled="isLoading || !isFormValid"
 				>
 					<UIcon name="i-mdi-check" class="mr-1" />
-					{{ id ? 'Update Profile' : 'Create Profile' }}
+					{{ userId ? 'Update Profile' : 'Create Profile' }}
 				</UButton>
 			</template>
 		</UCard>

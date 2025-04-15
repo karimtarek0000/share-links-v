@@ -84,7 +84,10 @@ export const useProfileApi = () => {
 		}
 	}
 
-	const uploadProfileImage = async (file: File, user_id: string) => {
+	const uploadProfileImage = async (
+		file: File,
+		user_id: string,
+	): Promise<any> => {
 		try {
 			// Get auth headers
 			const headers = await getAuthHeaders()

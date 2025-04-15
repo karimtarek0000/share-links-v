@@ -2,93 +2,70 @@ import { getAuthenticatedSupabase } from '@/server/utils/supabase'
 
 export default defineEventHandler(async event => {
 	try {
-		// Get authenticated Supabase client using our utility function
 		const { supabase, userId, handleSupabaseError } =
 			await getAuthenticatedSupabase(event)
 
-		// Parse multipart form data
 		const formData = await readMultipartFormData(event)
-
-		if (!formData || formData.length === 0) {
-			return createError({
-				statusCode: 400,
-				statusMessage: 'No file uploaded',
-			})
+		if (!formData?.length) {
+			return createError({ statusCode: 400, statusMessage: 'No file uploaded' })
 		}
 
-		// Get the file data
-		const fileData = formData.find(item => item.name === 'file')
-		if (!fileData || !fileData.data || !fileData.filename) {
+		const fileData = validateFileData(formData)
+		if (!fileData) {
 			return createError({
 				statusCode: 400,
 				statusMessage: 'Invalid file data',
 			})
 		}
 
-		// Get user ID from form data
-		const userIdField = formData.find(item => item.name === 'user_id')
-		if (!userIdField || !userIdField.data) {
+		const uploadUserId = validateUserId(formData)
+		if (!uploadUserId) {
 			return createError({
 				statusCode: 400,
 				statusMessage: 'User ID is required',
 			})
 		}
 
-		const user_id = Buffer.from(userIdField.data).toString('utf-8')
-
-		// Ensure user can only upload images for their own profile
-		if (userId !== user_id) {
+		if (userId !== uploadUserId) {
 			return createError({
 				statusCode: 403,
 				statusMessage: 'You can only upload images for your own profile',
 			})
 		}
 
-		// Check file type and size
-		const fileType = fileData.type || 'application/octet-stream'
-
-		if (!fileType.startsWith('image/')) {
+		if (!validateFileType(fileData)) {
 			return createError({
 				statusCode: 400,
 				statusMessage: 'Only image files are allowed',
 			})
 		}
 
-		// Check file size (limit to 5MB)
-		const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
-		if (fileData.data.length > MAX_FILE_SIZE) {
+		if (!validateFileSize(fileData)) {
 			return createError({
 				statusCode: 400,
 				statusMessage: 'File size exceeds the 5MB limit',
 			})
 		}
 
-		// Generate a unique filename
-		const fileExtension = fileData.filename.split('.').pop()
-		const uniqueFilename = `${user_id}-${Date.now()}.${fileExtension}`
+		const uniqueFilename = generateUniqueFilename(userId, fileData.filename)
 
-		// Upload to Supabase Storage
-		const { data, error } = await supabase.storage
-			.from('profile-images')
-			.upload(uniqueFilename, fileData.data, {
-				contentType: fileType,
-				upsert: true,
-			})
-
+		const { data, error } = await uploadToStorage(
+			supabase,
+			uniqueFilename,
+			fileData,
+		)
 		if (error) {
+			console.error('Storage upload error:', error)
 			return handleSupabaseError(error)
 		}
 
-		// Get the public URL for the uploaded image
-		const { data: publicUrlData } = supabase.storage
-			.from('profile-images')
-			.getPublicUrl(uniqueFilename)
+		const publicUrl = getPublicUrl(supabase, uniqueFilename)
 
 		return {
 			statusCode: 200,
 			body: {
 				path: data.path,
-				publicUrl: publicUrlData.publicUrl,
+				publicUrl,
 			},
 		}
 	} catch (err: any) {
@@ -101,3 +78,51 @@ export default defineEventHandler(async event => {
 		})
 	}
 })
+
+// Helper functions
+function validateFileData(formData: any[]) {
+	const fileData = formData.find(item => item.name === 'file')
+	return fileData?.data && fileData?.filename ? fileData : null
+}
+
+function validateUserId(formData: any[]) {
+	const userIdField = formData.find(item => item.name === 'user_id')
+	return userIdField?.data
+		? Buffer.from(userIdField.data).toString('utf-8')
+		: null
+}
+
+function validateFileType(fileData: any) {
+	const fileType = fileData.type || 'application/octet-stream'
+	return fileType.startsWith('image/')
+}
+
+function validateFileSize(fileData: any) {
+	const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+	return fileData.data.length <= MAX_FILE_SIZE
+}
+
+function generateUniqueFilename(userId: string, filename: string) {
+	const fileExtension = filename.split('.').pop()
+	return `${userId}/${Date.now()}.${fileExtension}`
+}
+
+async function uploadToStorage(
+	supabase: any,
+	uniqueFilename: string,
+	fileData: any,
+) {
+	return supabase.storage
+		.from('profile-images')
+		.upload(uniqueFilename, fileData.data, {
+			contentType: fileData.type || 'application/octet-stream',
+			upsert: true,
+		})
+}
+
+function getPublicUrl(supabase: any, uniqueFilename: string) {
+	const { data } = supabase.storage
+		.from('profile-images')
+		.getPublicUrl(uniqueFilename)
+	return data.publicUrl
+}

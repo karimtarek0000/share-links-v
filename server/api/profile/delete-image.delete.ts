@@ -2,67 +2,17 @@ import { getAuthenticatedSupabase } from '@/server/utils/supabase'
 
 export default defineEventHandler(async event => {
 	try {
-		// Get authenticated Supabase client using our utility function
 		const { supabase, userId, handleSupabaseError } =
 			await getAuthenticatedSupabase(event)
+		const { user_id, imagePath } = await readBody(event)
 
-		// Get request body
-		const body = await readBody(event)
-		const { user_id, imagePath } = body
+		// Validate request data
+		validateRequestData(userId, user_id, imagePath)
 
-		if (!user_id) {
-			return createError({
-				statusCode: 400,
-				statusMessage: 'User ID is required',
-			})
-		}
+		// Process image path
+		const path = extractImagePath(imagePath, user_id)
 
-		// Ensure user can only delete their own images
-		if (userId !== user_id) {
-			return createError({
-				statusCode: 403,
-				statusMessage: 'You can only delete your own images',
-			})
-		}
-
-		if (!imagePath) {
-			return createError({
-				statusCode: 400,
-				statusMessage: 'Image path is required',
-			})
-		}
-
-		// Check if image is a default image
-		if (
-			imagePath.includes('default') ||
-			!imagePath.includes('profile-images')
-		) {
-			return createError({
-				statusCode: 400,
-				statusMessage: 'Cannot delete default or external images',
-			})
-		}
-
-		// Extract path from the full URL
-		const pathParts = imagePath.split('profile-images/')
-		if (pathParts.length <= 1) {
-			return createError({
-				statusCode: 400,
-				statusMessage: 'Invalid image path format',
-			})
-		}
-
-		const path = pathParts[1]
-
-		// Check if the image belongs to the user (security check)
-		if (!path.startsWith(user_id)) {
-			return createError({
-				statusCode: 403,
-				statusMessage: 'Not authorized to delete this image',
-			})
-		}
-
-		// Delete the image from storage
+		// Delete image from storage
 		const { error: deleteError } = await supabase.storage
 			.from('profile-images')
 			.remove([path])
@@ -71,7 +21,7 @@ export default defineEventHandler(async event => {
 			return handleSupabaseError(deleteError)
 		}
 
-		// Update profile with null image
+		// Update profile in database
 		const { error: updateError } = await supabase
 			.from('profiles')
 			.update({ img: null })
@@ -83,9 +33,7 @@ export default defineEventHandler(async event => {
 
 		return {
 			statusCode: 200,
-			body: {
-				message: 'Image deleted successfully',
-			},
+			body: { message: 'Image deleted successfully' },
 		}
 	} catch (err: any) {
 		return createError({
@@ -97,3 +45,68 @@ export default defineEventHandler(async event => {
 		})
 	}
 })
+
+// Helper functions
+function validateRequestData(
+	authUserId: string,
+	requestUserId: string,
+	imagePath: string,
+) {
+	if (!requestUserId) {
+		throw createError({
+			statusCode: 400,
+			statusMessage: 'User ID is required',
+		})
+	}
+
+	if (authUserId !== requestUserId) {
+		throw createError({
+			statusCode: 403,
+			statusMessage: 'You can only delete your own images',
+		})
+	}
+
+	if (!imagePath) {
+		throw createError({
+			statusCode: 400,
+			statusMessage: 'Image path is required',
+		})
+	}
+
+	if (imagePath.includes('default')) {
+		throw createError({
+			statusCode: 400,
+			statusMessage: 'Cannot delete default images',
+		})
+	}
+}
+
+function extractImagePath(imagePath: string, userId: string): string {
+	// Validate path is not empty
+	if (!imagePath) {
+		throw createError({
+			statusCode: 400,
+			statusMessage: 'Invalid image path format',
+		})
+	}
+
+	// Path already in correct format: userId/filename
+	if (imagePath.startsWith(`${userId}/`)) {
+		return imagePath
+	}
+
+	// Try to extract filename if userId is in the path
+	if (imagePath.includes(userId)) {
+		const parts = imagePath.split(userId)
+		if (parts.length > 1) {
+			const filename = parts[1].replace(/^[\/\-]/, '')
+			return `${userId}/${filename}`
+		}
+	}
+
+	// Not authorized if we can't create a valid path
+	throw createError({
+		statusCode: 403,
+		statusMessage: 'Not authorized to delete this image',
+	})
+}
