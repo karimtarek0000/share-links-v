@@ -25,7 +25,7 @@ const isLoading = ref(false)
 // Get platform detection and toast
 const { detectPlatform, extractUsername } = useSocialPlatforms()
 const toast = useToast()
-const { addProfile } = useProfileApi()
+const { addProfile, getProfile } = useProfileApi()
 const { user } = useSupabase()
 
 // Store extracted usernames
@@ -172,6 +172,27 @@ function handleUrlChange(url: string, index: number): void {
 	extractedUsernames.value[index] = extractUsername(url, platform)
 }
 
+;(async () => {
+	try {
+		const { body } = await getProfile(user.value?.user.id)
+		state.name = body.name || ''
+		state.bio = body.bio || ''
+		state.profileImage = body.img || null
+		state.socials = body.social_links.map((link: string) => ({
+			platform: detectPlatform(link).platform,
+			url: link,
+			icon: detectPlatform(link).icon,
+		}))
+	} catch (error: any) {
+		toast.add({
+			title: error.message || 'Error fetching profile data',
+			description: 'Failed to retrieve your profile data',
+			color: 'error',
+			icon: 'i-mdi-alert',
+		})
+	}
+})()
+
 async function addNewProfile() {
 	isLoading.value = true
 	try {
@@ -202,8 +223,7 @@ async function addNewProfile() {
 		isLoading.value = false
 	}
 }
-
-// TODO: Form submission handler
+// Form submission handler
 async function onSubmit() {
 	addNewProfile()
 }
