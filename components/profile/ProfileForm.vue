@@ -161,9 +161,6 @@ async function removeProfileImage() {
 		URL.revokeObjectURL(state.profileImage)
 	}
 	await deleteImgProfile()
-	imgFile.value = null
-	state.profileImage = null
-	user.value.img = null
 }
 
 // Social Links Methods
@@ -237,7 +234,10 @@ async function deleteImgProfile() {
 	try {
 		await deleteProfileImage(user.value?.user.id, pathImg.value as string)
 
+		imgFile.value = null
 		state.profileImage = null
+		user.value.img = null
+
 		toast.add({
 			title: 'Profile image deleted successfully',
 			description: 'Your profile image has been deleted',
