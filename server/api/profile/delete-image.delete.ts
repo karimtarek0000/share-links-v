@@ -108,6 +108,5 @@ function extractImagePath(imagePath: string, userId: string) {
 		})
 	}
 
-	console.log('Deleting image at path:', path)
 	return path
 }
