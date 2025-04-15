@@ -163,6 +163,7 @@ async function removeProfileImage() {
 	await deleteImgProfile()
 	imgFile.value = null
 	state.profileImage = null
+	user.value.img = null
 }
 
 // Social Links Methods
