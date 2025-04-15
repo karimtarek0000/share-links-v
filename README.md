@@ -1,11 +1,13 @@
 # Share-Links
 
-Share-Linkes is a modern, customizable "link-in-bio" web application built with
+Share-Links is a modern, customizable "link-in-bio" web application built with
 Nuxt.js. It allows users to create and share a personalized profile page with
 their social media links and basic information.
 
 ## 🌟 Features
 
+- **User Authentication**: Secure signup, login, and password reset
+  functionality
 - **Profile Customization**: Add your name, bio, and profile picture
 - **Social Media Management**: Add, edit, and remove links to various social
   media platforms
@@ -16,11 +18,16 @@ their social media links and basic information.
 - **Form Validation**: Comprehensive validation using Zod schema
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
 - **Modern UI**: Built with Nuxt UI components for a clean, modern look
+- **Server API**: Built-in server endpoints for authentication and profile
+  management
+- **Supabase Integration**: Utilizes Supabase for authentication and data
+  storage
 
 ## 📋 Prerequisites
 
 - Node.js 16.x or later
 - npm, yarn, pnpm, or bun
+- Supabase account (for authentication and data storage)
 
 ## 🚀 Installation
 
@@ -28,8 +35,8 @@ Clone the repository and install dependencies:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/share-linkes.git
-cd share-linkes
+git clone https://github.com/karimtarek0000/share-links.git
+cd share-links
 
 # Install dependencies
 npm install
@@ -102,6 +109,7 @@ bun run preview
 - [Nuxt UI](https://ui.nuxt.com/) - UI component library for Nuxt
 - [Zod](https://github.com/colinhacks/zod) - TypeScript-first schema validation
 - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [Supabase](https://supabase.io/) - Open source Firebase alternative
 
 ## 📁 Project Structure
 
@@ -111,22 +119,42 @@ bun run preview
 ├── nuxt.config.ts       # Nuxt configuration
 ├── components/          # Vue components
 │   ├── AppHeader.vue    # Application header
+│   ├── Logo.vue         # Logo component
 │   └── profile/         # Profile-related components
 │       ├── ProfileForm.vue    # Form for editing profile
 │       └── ProfilePreview.vue # Preview of current profile
 ├── composables/         # Vue composables (hooks)
+│   ├── useAuthApi.ts         # Authentication API utilities
 │   ├── useFormValidation.ts  # Form validation utilities
+│   ├── useProfileApi.ts      # Profile API utilities
 │   ├── useProfileForm.ts     # Profile form state and methods
-│   └── useSocialPlatforms.ts # Social platform utilities
+│   ├── useServerSupabase.ts  # Server-side Supabase utilities
+│   ├── useSocialPlatforms.ts # Social platform utilities
+│   └── useSupabase.ts        # Client-side Supabase utilities
+├── layouts/             # Page layouts
+│   ├── auth.vue         # Layout for authentication pages
+│   └── default.vue      # Default layout for other pages
+├── middleware/          # Route middleware
+│   └── auth.ts          # Authentication middleware
 ├── pages/               # Application routes
-│   ├── index.vue        # Home page with profile editor
-│   ├── profile.vue      # Public profile page
-│   └── auth/            # Authentication pages
-│       ├── login.vue    # Login page
-│       └── signup.vue   # Signup page
+│   ├── index.vue        # Home page
+│   ├── auth/            # Authentication pages
+│   │   ├── forgot-password.vue  # Password recovery page
+│   │   ├── login.vue            # Login page
+│   │   ├── reset-password.vue   # Reset password page
+│   │   └── signup.vue           # Signup page
+│   └── profile/         # Profile pages
+│       └── [userid].vue # Dynamic user profile page
+├── server/              # Server API endpoints
+│   ├── api/             # API routes
+│   │   ├── auth/        # Authentication endpoints
+│   │   └── profile/     # Profile management endpoints
+│   ├── middleware/      # Server middleware
+│   └── utils/           # Server utilities
 ├── validation/          # Schema validation
-│   ├── authSchema.ts    # Auth form validation schemas
-│   └── profileSchema.ts # Profile form validation schemas
+│   ├── authSchema.ts        # Auth form validation schemas
+│   ├── profileSchema.ts     # Profile form validation schemas
+│   └── profileTableSchema.ts # Profile database schemas
 └── types/               # TypeScript type definitions
     └── social.ts        # Social media related types
 ```
@@ -163,8 +191,10 @@ details.
 
 ## 👨‍💻 Author
 
-Created by [karim tarek](https://github.com/yourusername)
+Created by [Karim Tarek](https://github.com/karimtarek)
 
 ---
+
+Last updated: April 15, 2025
 
 Made with ❤️ using [Nuxt 3](https://nuxt.com)
