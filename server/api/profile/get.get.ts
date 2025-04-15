@@ -3,7 +3,9 @@ import { getAuthenticatedSupabase } from '@/server/utils/supabase'
 export default defineEventHandler(async event => {
 	try {
 		// Get authenticated Supabase client using our utility function
-		const { supabase, handleSupabaseError } = await getAuthenticatedSupabase()
+		const { supabase, handleSupabaseError } = await getAuthenticatedSupabase(
+			event,
+		)
 
 		// Get query parameters
 		const query = getQuery(event)
