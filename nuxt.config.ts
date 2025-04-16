@@ -7,7 +7,7 @@ export default defineNuxtConfig({
 	css: ['~/assets/css/main.css'],
 	ui: {
 		global: true,
-		icons: ['heroicons', 'simple-icons'],
+		icons: ['heroicons', 'simple-icons', 'f7'],
 		colorMode: false,
 	},
 	// Runtime config for environment variables
