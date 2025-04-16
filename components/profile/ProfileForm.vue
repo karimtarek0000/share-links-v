@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useAsyncData } from '#app'
 import { profileSchema, validateProfile } from '@/validation/profileSchema'
 
 // -----------------------------
@@ -35,6 +36,16 @@ const {
 	deleteProfileImage,
 } = useProfileApi()
 const { user } = useSupabase()
+const {
+	isOnline,
+	hasUnsavedChanges,
+	isSyncing,
+	loadFromLocalStorage,
+	saveToLocalStorage,
+	clearFromLocalStorage,
+	startSync,
+	endSync,
+} = useOfflineMode(user.value?.user.id)
 
 // Store extracted usernames
 const extractedUsernames = ref<Record<number, string | null>>({})
@@ -61,8 +72,43 @@ await useAsyncData(async () => {
 			color: 'error',
 			icon: 'i-mdi-alert',
 		})
+
+		// Try loading from local storage as fallback
+		const offlineData = loadFromLocalStorage<UserData>('profile')
+		if (offlineData) {
+			state.name = offlineData.name || ''
+			state.bio = offlineData.bio || ''
+			state.profileImage = offlineData.profileImage || null
+			state.socials = offlineData.socials || []
+		}
 	}
 })
+
+// Sync offline changes to server
+const syncOfflineChanges = async () => {
+	if (!isOnline.value || !hasUnsavedChanges.value) return
+
+	startSync()
+	try {
+		if (userId.value) {
+			await updateDataProfile()
+		} else {
+			await addNewProfile()
+		}
+
+		// Clear local storage after successful sync
+		clearFromLocalStorage('profile')
+		endSync(true)
+	} catch (error: any) {
+		toast.add({
+			title: 'Sync failed',
+			description: error.message || 'Failed to sync offline changes',
+			color: 'error',
+			icon: 'i-mdi-cloud-alert',
+		})
+		endSync(false)
+	}
+}
 
 // -----------------------------
 // Computed Properties
@@ -158,7 +204,12 @@ async function onImageSelected(event: Event) {
 		imgFile.value = file
 		state.profileImage = URL.createObjectURL(file)
 
-		await uploadImgProfile()
+		if (isOnline.value) {
+			await uploadImgProfile()
+		} else {
+			// Store for offline mode
+			saveToLocalStorage('profile', state)
+		}
 	}
 }
 
@@ -230,6 +281,11 @@ function handleUrlChange(url: string, index: number): void {
 
 // Upload and Delete Image Methods
 async function uploadImgProfile() {
+	if (!isOnline.value) {
+		saveToLocalStorage('profile', state)
+		return
+	}
+
 	isLoading.value = true
 	try {
 		const { body } = await uploadProfileImage(
@@ -258,6 +314,13 @@ async function uploadImgProfile() {
 }
 
 async function deleteImgProfile(statusAlert: boolean = true) {
+	if (!isOnline.value) {
+		state.profileImage = null
+		imgFile.value = null
+		saveToLocalStorage('profile', state)
+		return
+	}
+
 	isLoading.value = true
 	try {
 		await deleteProfileImage(user.value?.user.id, pathImg.value as string)
@@ -287,7 +350,13 @@ async function deleteImgProfile(statusAlert: boolean = true) {
 		isLoading.value = false
 	}
 }
+
 async function addNewProfile() {
+	if (!isOnline.value) {
+		saveToLocalStorage('profile', state)
+		return
+	}
+
 	isLoading.value = true
 	try {
 		await addProfile(profileData.value)
@@ -298,6 +367,7 @@ async function addNewProfile() {
 			color: 'success',
 			icon: 'i-mdi-check',
 		})
+		clearFromLocalStorage('profile')
 	} catch (error: any) {
 		toast.add({
 			title: error.message || 'Error saving profile',
@@ -309,7 +379,13 @@ async function addNewProfile() {
 		isLoading.value = false
 	}
 }
+
 async function updateDataProfile() {
+	if (!isOnline.value) {
+		saveToLocalStorage('profile', state)
+		return
+	}
+
 	isLoading.value = true
 	try {
 		await updateProfile(profileData.value)
@@ -320,6 +396,7 @@ async function updateDataProfile() {
 			color: 'success',
 			icon: 'i-mdi-check',
 		})
+		clearFromLocalStorage('profile')
 	} catch (error: any) {
 		toast.add({
 			title: error.message || 'Error updating profile',
@@ -331,9 +408,14 @@ async function updateDataProfile() {
 		isLoading.value = false
 	}
 }
+
 // Form submission handler
 async function onSubmit() {
-	userId.value ? updateDataProfile() : addNewProfile()
+	if (isOnline.value) {
+		userId.value ? updateDataProfile() : addNewProfile()
+	} else {
+		saveToLocalStorage('profile', state)
+	}
 }
 
 // Make userData available to parent components
@@ -354,6 +436,24 @@ defineExpose({ userData: state })
 					<p class="text-sm text-gray-600 mt-1">
 						Update your profile information and manage your social links
 					</p>
+					<!-- Network status indicator -->
+					<div
+						class="mt-2 inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium"
+						:class="
+							isOnline
+								? 'bg-green-100 text-green-800'
+								: 'bg-amber-100 text-amber-800'
+						"
+					>
+						<UIcon :name="isOnline ? 'i-mdi-wifi' : 'i-mdi-wifi-off'" />
+						{{ isOnline ? 'Online' : 'Offline' }}
+						<span v-if="hasUnsavedChanges && !isOnline" class="ml-1"
+							>(Changes saved locally)</span
+						>
+						<span v-if="isSyncing" class="ml-1 animate-pulse"
+							>(Syncing...)</span
+						>
+					</div>
 				</div>
 			</template>
 
@@ -622,8 +722,17 @@ defineExpose({ userData: state })
 					:loading="isLoading"
 					:disabled="isLoading || !isFormValid"
 				>
-					<UIcon name="i-mdi-check" class="mr-1" />
-					{{ userId ? 'Update Profile' : 'Create Profile' }}
+					<UIcon
+						:name="isOnline ? 'i-mdi-check' : 'i-mdi-content-save'"
+						class="mr-1"
+					/>
+					{{
+						isOnline
+							? userId
+								? 'Update Profile'
+								: 'Create Profile'
+							: 'Save Locally'
+					}}
 				</UButton>
 			</template>
 		</UCard>
