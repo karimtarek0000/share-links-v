@@ -36,16 +36,8 @@ const {
 	deleteProfileImage,
 } = useProfileApi()
 const { user } = useSupabase()
-const {
-	isOnline,
-	hasUnsavedChanges,
-	isSyncing,
-	loadFromLocalStorage,
-	saveToLocalStorage,
-	clearFromLocalStorage,
-	startSync,
-	endSync,
-} = useOfflineMode(user.value?.user.id)
+const { isOnline, hasUnsavedChanges, isSyncing, activateSyncDataState } =
+	useOfflineMode(fnSendDataToServer)
 
 // Store extracted usernames
 const extractedUsernames = ref<Record<number, string | null>>({})
@@ -72,43 +64,8 @@ await useAsyncData(async () => {
 			color: 'error',
 			icon: 'i-mdi-alert',
 		})
-
-		// Try loading from local storage as fallback
-		const offlineData = loadFromLocalStorage<UserData>('profile')
-		if (offlineData) {
-			state.name = offlineData.name || ''
-			state.bio = offlineData.bio || ''
-			state.profileImage = offlineData.profileImage || null
-			state.socials = offlineData.socials || []
-		}
 	}
 })
-
-// Sync offline changes to server
-const syncOfflineChanges = async () => {
-	if (!isOnline.value || !hasUnsavedChanges.value) return
-
-	startSync()
-	try {
-		if (userId.value) {
-			await updateDataProfile()
-		} else {
-			await addNewProfile()
-		}
-
-		// Clear local storage after successful sync
-		clearFromLocalStorage('profile')
-		endSync(true)
-	} catch (error: any) {
-		toast.add({
-			title: 'Sync failed',
-			description: error.message || 'Failed to sync offline changes',
-			color: 'error',
-			icon: 'i-mdi-cloud-alert',
-		})
-		endSync(false)
-	}
-}
 
 // -----------------------------
 // Computed Properties
@@ -197,7 +154,7 @@ async function onImageSelected(event: Event) {
 			URL.revokeObjectURL(state.profileImage)
 		}
 
-		if (state.profileImage) {
+		if (state.profileImage && isOnline.value) {
 			await deleteImgProfile(false)
 		}
 
@@ -206,9 +163,6 @@ async function onImageSelected(event: Event) {
 
 		if (isOnline.value) {
 			await uploadImgProfile()
-		} else {
-			// Store for offline mode
-			saveToLocalStorage('profile', state)
 		}
 	}
 }
@@ -282,7 +236,6 @@ function handleUrlChange(url: string, index: number): void {
 // Upload and Delete Image Methods
 async function uploadImgProfile() {
 	if (!isOnline.value) {
-		saveToLocalStorage('profile', state)
 		return
 	}
 
@@ -315,9 +268,6 @@ async function uploadImgProfile() {
 
 async function deleteImgProfile(statusAlert: boolean = true) {
 	if (!isOnline.value) {
-		state.profileImage = null
-		imgFile.value = null
-		saveToLocalStorage('profile', state)
 		return
 	}
 
@@ -352,11 +302,6 @@ async function deleteImgProfile(statusAlert: boolean = true) {
 }
 
 async function addNewProfile() {
-	if (!isOnline.value) {
-		saveToLocalStorage('profile', state)
-		return
-	}
-
 	isLoading.value = true
 	try {
 		await addProfile(profileData.value)
@@ -367,7 +312,6 @@ async function addNewProfile() {
 			color: 'success',
 			icon: 'i-mdi-check',
 		})
-		clearFromLocalStorage('profile')
 	} catch (error: any) {
 		toast.add({
 			title: error.message || 'Error saving profile',
@@ -381,11 +325,6 @@ async function addNewProfile() {
 }
 
 async function updateDataProfile() {
-	if (!isOnline.value) {
-		saveToLocalStorage('profile', state)
-		return
-	}
-
 	isLoading.value = true
 	try {
 		await updateProfile(profileData.value)
@@ -396,7 +335,6 @@ async function updateDataProfile() {
 			color: 'success',
 			icon: 'i-mdi-check',
 		})
-		clearFromLocalStorage('profile')
 	} catch (error: any) {
 		toast.add({
 			title: error.message || 'Error updating profile',
@@ -410,12 +348,11 @@ async function updateDataProfile() {
 }
 
 // Form submission handler
+function fnSendDataToServer() {
+	return userId.value ? updateDataProfile() : addNewProfile()
+}
 async function onSubmit() {
-	if (isOnline.value) {
-		userId.value ? updateDataProfile() : addNewProfile()
-	} else {
-		saveToLocalStorage('profile', state)
-	}
+	isOnline.value ? await fnSendDataToServer() : activateSyncDataState()
 }
 
 // Make userData available to parent components
