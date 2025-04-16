@@ -668,7 +668,7 @@ defineExpose({ userData: state })
 							? userId
 								? 'Update Profile'
 								: 'Create Profile'
-							: 'Save Locally'
+							: 'Save to sync later'
 					}}
 				</UButton>
 			</template>
