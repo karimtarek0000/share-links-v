@@ -382,7 +382,9 @@ defineExpose({ userData: state })
 								: 'bg-amber-100 text-amber-800'
 						"
 					>
-						<UIcon :name="isOnline ? 'i-mdi-wifi' : 'i-mdi-wifi-off'" />
+						<UIcon
+							:name="isOnline ? 'i-mdi-wifi' : 'i-mdi-wifi-strength-off'"
+						/>
 						{{ isOnline ? 'Online' : 'Offline' }}
 						<span v-if="hasUnsavedChanges && !isOnline" class="ml-1"
 							>(Changes saved locally)</span
