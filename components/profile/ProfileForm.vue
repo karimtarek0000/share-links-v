@@ -393,7 +393,7 @@ defineExpose({ userData: state })
 			</template>
 
 			<!-- Profile Image Upload -->
-			<div class="mb-6">
+			<div :class="['mb-6', { 'pointer-events-none': !isOnline }]">
 				<div
 					class="p-6 border-2 border-dashed rounded-xl flex flex-col items-center justify-center"
 					:class="
@@ -657,10 +657,8 @@ defineExpose({ userData: state })
 					:loading="isLoading"
 					:disabled="isLoading || !isFormValid"
 				>
-					<UIcon
-						:name="isOnline ? 'i-mdi-check' : 'i-mdi-content-save'"
-						class="mr-1"
-					/>
+					<UIcon v-show="isOnline" name="i-mdi-check" class="mr-1" />
+					<UIcon v-show="!isOnline" name="i-mdi-cloud-sync" class="mr-1" />
 					{{
 						isOnline
 							? userId
