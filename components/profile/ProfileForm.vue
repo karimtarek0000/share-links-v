@@ -39,6 +39,31 @@ const { user } = useSupabase()
 // Store extracted usernames
 const extractedUsernames = ref<Record<number, string | null>>({})
 
+// This for make sure data will getting after redirect to the page
+await useAsyncData(async () => {
+	try {
+		const { body } = await getProfile(user.value?.user.id)
+		state.name = body.name || ''
+		state.bio = body.bio || ''
+		state.profileImage = body.img || null
+		state.socials = body.social_links.map((link: string) => ({
+			platform: detectPlatform(link).platform,
+			url: link,
+			icon: detectPlatform(link).icon,
+		}))
+
+		userId.value = body.id
+		user.value.img = body.img
+	} catch (error: any) {
+		toast.add({
+			title: error.message || 'Error fetching profile data',
+			description: 'Failed to retrieve your profile data',
+			color: 'error',
+			icon: 'i-mdi-alert',
+		})
+	}
+})
+
 // -----------------------------
 // Computed Properties
 // -----------------------------
@@ -313,29 +338,6 @@ async function onSubmit() {
 
 // Make userData available to parent components
 defineExpose({ userData: state })
-;(async () => {
-	try {
-		const { body } = await getProfile(user.value?.user.id)
-		state.name = body.name || ''
-		state.bio = body.bio || ''
-		state.profileImage = body.img || null
-		state.socials = body.social_links.map((link: string) => ({
-			platform: detectPlatform(link).platform,
-			url: link,
-			icon: detectPlatform(link).icon,
-		}))
-
-		userId.value = body.id
-		user.value.img = body.img
-	} catch (error: any) {
-		toast.add({
-			title: error.message || 'Error fetching profile data',
-			description: 'Failed to retrieve your profile data',
-			color: 'error',
-			icon: 'i-mdi-alert',
-		})
-	}
-})()
 </script>
 
 <template>
