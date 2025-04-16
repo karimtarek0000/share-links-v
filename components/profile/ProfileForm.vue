@@ -368,7 +368,7 @@ defineExpose({ userData: state })
 	>
 		<UCard class="shadow-lg">
 			<template #header>
-				<div class="px-4 pt-4 pb-2 text-center">
+				<div class="px-4 pt-4 text-center">
 					<h2 class="text-2xl font-semibold">Customize Your Links</h2>
 					<p class="text-sm text-gray-600 mt-1">
 						Update your profile information and manage your social links
@@ -376,16 +376,12 @@ defineExpose({ userData: state })
 					<!-- Network status indicator -->
 					<div
 						class="mt-2 inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium"
-						:class="
-							isOnline
-								? 'bg-green-100 text-green-800'
-								: 'bg-amber-100 text-amber-800'
-						"
+						:class="isOnline ? 'bg-white' : 'bg-amber-100 text-amber-800'"
 					>
-						<UIcon
-							:name="isOnline ? 'i-mdi-wifi' : 'i-mdi-wifi-strength-off'"
-						/>
-						{{ isOnline ? 'Online' : 'Offline' }}
+						<div v-show="!isOnline" class="space-x-1.5">
+							<UIcon name="f7:wifi-slash" />
+							<span>Offline</span>
+						</div>
 						<span v-if="hasUnsavedChanges && !isOnline" class="ml-1"
 							>(Changes saved locally)</span
 						>
