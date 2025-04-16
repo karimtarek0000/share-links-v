@@ -5,7 +5,8 @@ export default defineEventHandler(async event => {
 		const { supabase, userId, handleSupabaseError } =
 			await getAuthenticatedSupabase(event)
 
-		const formData = await readMultipartFormData(event)
+		const formData: any = await readMultipartFormData(event)
+
 		if (!formData?.length) {
 			return createError({ statusCode: 400, statusMessage: 'No file uploaded' })
 		}
@@ -49,17 +50,27 @@ export default defineEventHandler(async event => {
 
 		const uniqueFilename = generateUniqueFilename(userId, fileData.filename)
 
+		// 1# Upload new image to storage
 		const { data, error } = await uploadToStorage(
 			supabase,
 			uniqueFilename,
 			fileData,
 		)
 		if (error) {
-			console.error('Storage upload error:', error)
 			return handleSupabaseError(error)
 		}
 
 		const publicUrl = getPublicUrl(supabase, uniqueFilename)
+
+		// 2# Update profile in database
+		const { error: updateError } = await supabase
+			.from('profiles')
+			.update({ img: publicUrl })
+			.eq('user_id', userId)
+
+		if (updateError) {
+			return handleSupabaseError(updateError)
+		}
 
 		return {
 			statusCode: 200,
