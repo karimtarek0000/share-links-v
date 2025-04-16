@@ -64,7 +64,7 @@ export default function useOfflineMode(
 			title: "You're offline",
 			description: 'Changes will be saved locally',
 			color: 'warning',
-			icon: 'i-mdi-wifi-off',
+			icon: 'f7:wifi-slash',
 		})
 	}
 
