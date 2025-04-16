@@ -126,11 +126,14 @@ async function onImageSelected(event: Event) {
 			URL.revokeObjectURL(state.profileImage)
 		}
 
+		if (state.profileImage) {
+			await deleteImgProfile(false)
+		}
+
 		imgFile.value = file
 		state.profileImage = URL.createObjectURL(file)
 
 		await uploadImgProfile()
-		await updateDataProfile()
 	}
 }
 
@@ -229,7 +232,7 @@ async function uploadImgProfile() {
 	}
 }
 
-async function deleteImgProfile() {
+async function deleteImgProfile(statusAlert: boolean = true) {
 	isLoading.value = true
 	try {
 		await deleteProfileImage(user.value?.user.id, pathImg.value as string)
@@ -238,19 +241,23 @@ async function deleteImgProfile() {
 		state.profileImage = null
 		user.value.img = null
 
-		toast.add({
-			title: 'Profile image deleted successfully',
-			description: 'Your profile image has been deleted',
-			color: 'success',
-			icon: 'i-mdi-check',
-		})
+		if (statusAlert) {
+			toast.add({
+				title: 'Profile image deleted successfully',
+				description: 'Your profile image has been deleted',
+				color: 'success',
+				icon: 'i-mdi-check',
+			})
+		}
 	} catch (error: any) {
-		toast.add({
-			title: error.message || 'Error deleting image',
-			description: 'Failed to delete your profile image',
-			color: 'error',
-			icon: 'i-mdi-alert',
-		})
+		if (statusAlert) {
+			toast.add({
+				title: error.message || 'Error deleting image',
+				description: 'Failed to delete your profile image',
+				color: 'error',
+				icon: 'i-mdi-alert',
+			})
+		}
 	} finally {
 		isLoading.value = false
 	}
