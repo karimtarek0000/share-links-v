@@ -22,6 +22,8 @@ their social media links and basic information.
   management
 - **Supabase Integration**: Utilizes Supabase for authentication and data
   storage
+- **Offline Mode**: Continue editing your profile while offline with automatic
+  data synchronization when connection is restored
 
 ## 📋 Prerequisites
 
@@ -126,6 +128,7 @@ bun run preview
 ├── composables/         # Vue composables (hooks)
 │   ├── useAuthApi.ts         # Authentication API utilities
 │   ├── useFormValidation.ts  # Form validation utilities
+│   ├── useOfflineMode.ts     # Offline mode functionality
 │   ├── useProfileApi.ts      # Profile API utilities
 │   ├── useProfileForm.ts     # Profile form state and methods
 │   ├── useServerSupabase.ts  # Server-side Supabase utilities
@@ -195,6 +198,6 @@ Created by [Karim Tarek](https://github.com/karimtarek)
 
 ---
 
-Last updated: April 15, 2025
+Last updated: April 16, 2025
 
 Made with ❤️ using [Nuxt 3](https://nuxt.com)
