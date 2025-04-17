@@ -1,15 +1,13 @@
 <template>
 	<UContainer class="h-screen flex flex-col items-center justify-center">
-		<!-- Simple header with just the logo for error pages -->
 		<div class="w-full py-6">
 			<AppHeader :hide="true" />
 		</div>
-		<!-- Main content slot -->
+
 		<div class="w-full flex flex-col items-center justify-center">
 			<slot />
 		</div>
 
-		<!-- Simple footer -->
 		<p class="w-full py-4 text-center text-gray-400 text-sm">
 			&copy; {{ new Date().getFullYear() }} Share Linkes. All rights reserved.
 		</p>
