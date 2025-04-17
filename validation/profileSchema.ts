@@ -50,7 +50,7 @@ export const profileTableSchema = z.object({
 		.min(10, 'Bio must be at least 10 characters')
 		.max(150, 'Bio must be 150 characters or less'),
 	img: z.string().nullable(),
-	social_links: profileSchema.shape.socials,
+	social_links: z.array(z.string()),
 })
 
 // Type for Supabase profiles table
