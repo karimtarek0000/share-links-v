@@ -1,11 +1,11 @@
-import { getAuthenticatedSupabase } from '@/server/utils/supabase'
+import { useServerSupabase } from '@/composables/useServerSupabase'
+import { useSupabase } from '@/composables/useSupabase'
 
 export default defineEventHandler(async event => {
 	try {
 		// Get authenticated Supabase client using our utility function
-		const { supabase, handleSupabaseError } = await getAuthenticatedSupabase(
-			event,
-		)
+		const { supabase } = useSupabase()
+		const { handleSupabaseError } = useServerSupabase()
 
 		// Get query parameters
 		const query = getQuery(event)
