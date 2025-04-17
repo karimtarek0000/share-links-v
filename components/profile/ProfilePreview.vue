@@ -96,7 +96,9 @@ const { getPlatformColor } = useSocialPlatforms()
 									text="Click to visit"
 								>
 									<a
-										href="#"
+										:href="social.url"
+										target="_blank"
+										rel="noopener noreferrer"
 										class="flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-300 shadow-sm hover:shadow active:scale-[0.98]"
 										:class="[
 											getPlatformColor(social.platform, 'bg'),
