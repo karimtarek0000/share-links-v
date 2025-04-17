@@ -23,14 +23,14 @@ export const profileSchema = z.object({
 						url => {
 							if (!url) return false // No longer allow empty URLs
 
-							// Check for required format with complete domain
+							// Updated regex to accept paths after domain (e.g., /WatchiTMENA/)
 							const regex =
-								/^https?:\/\/www\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$/
+								/^https?:\/\/www\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{2,62})+(\/.*)*/
 							return regex.test(url)
 						},
 						{
 							message:
-								'URL must be a complete address (e.g., https://www.google.com)',
+								'URL must be a complete address (e.g., https://www.facebook.com/username)',
 						},
 					),
 				icon: z.string(),
