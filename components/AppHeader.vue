@@ -3,6 +3,15 @@ const { logout } = useAuthApi()
 const toast = useToast()
 const { user } = useSupabase()
 
+withDefaults(
+	defineProps<{
+		hide: boolean
+	}>(),
+	{
+		hide: false,
+	},
+)
+
 // State for the component
 const shareableLink = ref(
 	typeof window !== 'undefined'
@@ -78,6 +87,7 @@ const dropdownItems = [
 			<div class="relative z-10 px-6 py-8 text-center">
 				<!-- User dropdown menu positioned at top right -->
 				<div
+					v-if="!hide"
 					class="absolute flex rounded-full -top-5 shadow shadow-lg right-2 border border-blue-700"
 				>
 					<UButtonGroup>
@@ -89,8 +99,8 @@ const dropdownItems = [
 								class="size-12 rounded-full flex items-center justify-center"
 							>
 								<UAvatar
-									v-if="user.img"
-									:src="user.img"
+									v-if="user?.img"
+									:src="user?.img"
 									alt="User profile"
 									size="xl"
 								/>
@@ -128,7 +138,7 @@ const dropdownItems = [
 				</p>
 
 				<!-- Link sharing component -->
-				<div class="max-w-md mx-auto mt-6">
+				<div v-if="!hide" class="max-w-md mx-auto mt-6">
 					<!-- Share link input with copy button -->
 					<div
 						class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-800 transition-all duration-300"
