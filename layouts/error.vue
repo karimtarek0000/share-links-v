@@ -13,11 +13,3 @@
 		</p>
 	</UContainer>
 </template>
-
-<script setup lang="ts">
-// No special logic needed for this layout
-</script>
-
-<style scoped>
-/* Any error-specific styling can go here */
-</style>
