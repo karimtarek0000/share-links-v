@@ -189,20 +189,6 @@ bun run preview
     └── social.ts        # Social media related types
 ```
 
-## ⚡ Offline Mode Details
-
-The application includes a robust offline mode functionality:
-
-- **Local Storage**: Profile data is cached in the browser's local storage when
-  a user is editing
-- **Automatic Synchronization**: Changes made offline are automatically
-  synchronized when the internet connection is restored
-- **Conflict Resolution**: Smart conflict resolution strategy when local and
-  remote data differ
-- **Offline Indicator**: Visual indication to users when they're working offline
-- **Background Sync**: Uses the Background Sync API (when available) to ensure
-  data is saved even if the user closes the tab while offline
-
 ## 📱 Supported Social Platforms
 
 - Instagram
