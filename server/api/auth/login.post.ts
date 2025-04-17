@@ -1,5 +1,5 @@
+import { useServerSupabase } from '@/composables/useServerSupabase'
 import { loginSchema } from '@/validation/authSchema'
-import { useServerSupabase } from '~/composables/useServerSupabase'
 
 export default defineEventHandler(async event => {
 	try {
