@@ -30,7 +30,7 @@ export const profileSchema = z.object({
 						},
 						{
 							message:
-								'URL must be a complete address (e.g., https://www.facebook.com/username)',
+								'URL must be like (e.g., https://www.facebook.com/username)',
 						},
 					),
 				icon: z.string(),
@@ -42,6 +42,20 @@ export const profileSchema = z.object({
 			path: ['socials'],
 		}),
 })
+
+export const profileTableSchema = z.object({
+	user_id: z.string().min(1, 'User ID is required'),
+	name: z.string().min(5, 'Name must be at least 5 characters'),
+	bio: z
+		.string()
+		.min(10, 'Bio must be at least 10 characters')
+		.max(150, 'Bio must be 150 characters or less'),
+	img: z.string().nullable(),
+	social_links: z.array(z.string()),
+})
+
+// Type for Supabase profiles table
+export type ProfileTable = z.infer<typeof profileTableSchema>
 
 // Type for validation errors
 export type ValidationError = {

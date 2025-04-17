@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useAsyncData } from '#app'
 import { profileSchema, validateProfile } from '@/validation/profileSchema'
 
 // -----------------------------
@@ -7,12 +6,7 @@ import { profileSchema, validateProfile } from '@/validation/profileSchema'
 // -----------------------------
 
 // Create reactive form state
-const state = reactive<UserData>({
-	name: '',
-	bio: '',
-	profileImage: null,
-	socials: [],
-})
+const state = reactive<UserData>({} as UserData)
 
 // Validation state
 const errors = ref<any[]>([])

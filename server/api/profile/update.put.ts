@@ -1,4 +1,4 @@
-import { profileTableSchema } from '@/validation/profileTableSchema'
+import { profileTableSchema } from '@/validation/profileSchema'
 import { getAuthenticatedSupabase } from '@/server/utils/supabase'
 
 export default defineEventHandler(async event => {

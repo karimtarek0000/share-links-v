@@ -1,4 +1,4 @@
-import { type ProfileTable } from '@/validation/profileTableSchema'
+import { type ProfileTable } from '@/validation/profileSchema'
 
 interface ApiResponse {
 	statusCode: number
