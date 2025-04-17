@@ -9,12 +9,7 @@ const toast = useToast()
 const { params } = useRoute()
 
 // Create reactive form state
-const userData = reactive<UserData>({
-	name: '',
-	bio: '',
-	profileImage: null,
-	socials: [],
-})
+const userData = reactive<UserData>({} as UserData)
 
 // This for make sure data will getting after redirect to the page
 await useAsyncData(async () => {
@@ -35,6 +30,7 @@ await useAsyncData(async () => {
 			color: 'error',
 			icon: 'i-mdi-alert',
 		})
+		navigateTo('/auth/login')
 	}
 })
 </script>
