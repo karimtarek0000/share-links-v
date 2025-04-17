@@ -5,7 +5,7 @@ const { user } = useSupabase()
 
 withDefaults(
 	defineProps<{
-		hide: boolean
+		hide?: boolean
 	}>(),
 	{
 		hide: false,
