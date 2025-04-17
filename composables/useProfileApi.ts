@@ -50,15 +50,11 @@ export const useProfileApi = () => {
 
 	const getProfile = async (user_id: string): Promise<any> => {
 		try {
-			// Get auth headers
-			const headers = await getAuthHeaders()
-
 			const data: ApiResponse = await $fetch(`/api/profile/get`, {
 				method: 'GET',
 				params: {
 					user_id,
 				},
-				headers,
 			})
 
 			return data
