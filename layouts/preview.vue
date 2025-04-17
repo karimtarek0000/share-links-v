@@ -1,6 +1,6 @@
 <template>
 	<UContainer class="min-h-screen flex flex-col items-center justify-center">
-		<AppHeader :hide="true" class="w-full" />
+		<AppHeader :hide="true" class="w-full mb-10" />
 		<slot />
 		<div class="text-center mt-20">
 			<p class="text-gray-600 dark:text-gray-400">
