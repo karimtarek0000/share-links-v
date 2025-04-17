@@ -50,6 +50,16 @@ pnpm install
 bun install
 ```
 
+## 🔧 Configuration
+
+Create a `.env` file in the root directory with your Supabase credentials:
+
+```
+NUXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NUXT_PUBLIC_SUPABASE_KEY=your-supabase-anon-key
+NUXT_SUPABASE_SERVICE_KEY=your-supabase-service-key
+```
+
 ## 💻 Development
 
 Start the development server on `http://localhost:3000`:
@@ -119,6 +129,9 @@ bun run preview
 ├── app.vue              # Main application entry point
 ├── app.config.ts        # Application configuration
 ├── nuxt.config.ts       # Nuxt configuration
+├── assets/              # Static assets
+│   └── css/             # CSS files
+│       └── main.css     # Main stylesheet
 ├── components/          # Vue components
 │   ├── AppHeader.vue    # Application header
 │   ├── Logo.vue         # Logo component
@@ -136,7 +149,8 @@ bun run preview
 │   └── useSupabase.ts        # Client-side Supabase utilities
 ├── layouts/             # Page layouts
 │   ├── auth.vue         # Layout for authentication pages
-│   └── default.vue      # Default layout for other pages
+│   ├── default.vue      # Default layout for other pages
+│   └── preview.vue      # Preview layout for profile preview
 ├── middleware/          # Route middleware
 │   └── auth.ts          # Authentication middleware
 ├── pages/               # Application routes
@@ -148,19 +162,46 @@ bun run preview
 │   │   └── signup.vue           # Signup page
 │   └── profile/         # Profile pages
 │       └── [userid].vue # Dynamic user profile page
+├── public/              # Public static assets
+│   ├── favicon.ico      # Site favicon
+│   └── robots.txt       # Robots file for SEO
 ├── server/              # Server API endpoints
 │   ├── api/             # API routes
 │   │   ├── auth/        # Authentication endpoints
+│   │   │   ├── forgot-password.post.ts # Password reset request
+│   │   │   ├── login.post.ts           # User login
+│   │   │   ├── logout.post.ts          # User logout
+│   │   │   └── signup.post.ts          # User registration
 │   │   └── profile/     # Profile management endpoints
+│   │       ├── add.post.ts          # Create profile
+│   │       ├── delete-image.delete.ts # Delete profile image
+│   │       ├── get.get.ts           # Get profile data
+│   │       ├── update.put.ts        # Update profile
+│   │       └── upload-image.post.ts # Upload profile image
 │   ├── middleware/      # Server middleware
+│   │   └── supabase-auth.ts # Supabase auth middleware
 │   └── utils/           # Server utilities
+│       └── supabase.ts  # Supabase server connection
 ├── validation/          # Schema validation
-│   ├── authSchema.ts        # Auth form validation schemas
-│   ├── profileSchema.ts     # Profile form validation schemas
-│   └── profileTableSchema.ts # Profile database schemas
+│   ├── authSchema.ts    # Auth form validation schemas
+│   └── profileSchema.ts # Profile form validation schemas
 └── types/               # TypeScript type definitions
     └── social.ts        # Social media related types
 ```
+
+## ⚡ Offline Mode Details
+
+The application includes a robust offline mode functionality:
+
+- **Local Storage**: Profile data is cached in the browser's local storage when
+  a user is editing
+- **Automatic Synchronization**: Changes made offline are automatically
+  synchronized when the internet connection is restored
+- **Conflict Resolution**: Smart conflict resolution strategy when local and
+  remote data differ
+- **Offline Indicator**: Visual indication to users when they're working offline
+- **Background Sync**: Uses the Background Sync API (when available) to ensure
+  data is saved even if the user closes the tab while offline
 
 ## 📱 Supported Social Platforms
 
@@ -198,6 +239,6 @@ Created by [Karim Tarek](https://github.com/karimtarek)
 
 ---
 
-Last updated: April 16, 2025
+Last updated: April 17, 2025
 
 Made with ❤️ using [Nuxt 3](https://nuxt.com)
