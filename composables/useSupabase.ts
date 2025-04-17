@@ -27,7 +27,6 @@ export const useSupabase = () => {
 			const { data, error: sessionError } = await supabase.auth.getSession()
 
 			if (sessionError) {
-				console.error('Session error:', sessionError)
 				throw sessionError
 			}
 
@@ -38,8 +37,7 @@ export const useSupabase = () => {
 				user.value = null
 				return null
 			}
-		} catch (err) {
-			console.error('Error getting user session:', err)
+		} catch (err: any) {
 			error.value = err.message || 'Failed to get current user'
 			user.value = null
 			return null
