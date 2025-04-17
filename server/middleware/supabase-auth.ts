@@ -18,6 +18,10 @@ export default defineEventHandler(async event => {
 		return
 	}
 
+	if (event.method === 'GET') {
+		return
+	}
+
 	// Extract the authorization token from headers
 	const authHeader = getRequestHeader(event, 'authorization')
 	if (!authHeader || !authHeader.startsWith('Bearer ')) {
