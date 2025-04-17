@@ -23,9 +23,8 @@ export const profileSchema = z.object({
 						url => {
 							if (!url) return false // No longer allow empty URLs
 
-							// Updated regex to accept paths after domain (e.g., /WatchiTMENA/)
 							const regex =
-								/^https?:\/\/www\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{2,62})+(\/.*)*/
+								/^https?:\/\/(www|web)\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{2,62})+(\/.*)*/
 							return regex.test(url)
 						},
 						{
@@ -51,7 +50,7 @@ export const profileTableSchema = z.object({
 		.min(10, 'Bio must be at least 10 characters')
 		.max(150, 'Bio must be 150 characters or less'),
 	img: z.string().nullable(),
-	social_links: z.array(z.string()),
+	social_links: profileSchema.shape.socials,
 })
 
 // Type for Supabase profiles table
