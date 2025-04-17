@@ -43,11 +43,19 @@ await useAsyncData(async () => {
 		state.name = body.name || ''
 		state.bio = body.bio || ''
 		state.profileImage = body.img || null
-		state.socials = body.social_links.map((link: string) => ({
-			platform: detectPlatform(link).platform,
-			url: link,
-			icon: detectPlatform(link).icon,
-		}))
+		const loadedLinks = body.social_links || []
+		state.socials = loadedLinks.map((link: string, index: number) => {
+			const { platform, icon } = detectPlatform(link)
+			// Extract username during mapping
+			const username = extractUsername(link, platform)
+
+			// Store extracted username
+			if (username) {
+				extractedUsernames.value[index] = username
+			}
+
+			return { platform, url: link, icon }
+		})
 
 		userId.value = body.id
 		user.value.img = body.img
