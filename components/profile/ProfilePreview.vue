@@ -120,7 +120,7 @@ const { getPlatformColor } = useSocialPlatforms()
 								</UTooltip>
 
 								<p
-									v-if="!userData.socials.length"
+									v-if="!userData.socials?.length"
 									class="text-center text-gray-500 dark:text-gray-400 text-sm py-8 italic"
 								>
 									No links added yet
