@@ -13,7 +13,10 @@ export const useSupabase = () => {
 	const supabaseKey = config.public.supabaseKey
 
 	if (!supabaseUrl || !supabaseKey) {
-		throw new Error('Supabase configuration is incomplete')
+		throw createError({
+			statusCode: 500,
+			statusMessage: 'Supabase configuration is incomplete',
+		})
 	}
 
 	const supabase = createClient(supabaseUrl, supabaseKey)
