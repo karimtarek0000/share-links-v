@@ -2,13 +2,19 @@
 export default defineNuxtConfig({
 	compatibilityDate: '2024-11-01',
 	devtools: { enabled: true },
-	ssr: false,
 	modules: ['@nuxt/ui'],
 	css: ['~/assets/css/main.css'],
 	ui: {
 		global: true,
 		icons: ['heroicons', 'simple-icons', 'f7'],
 		colorMode: false,
+	},
+	// Hybrid rendering configuration using routeRules
+	routeRules: {
+		'/': { ssr: false },
+		'/error': { static: true },
+		'/profile/**': { ssr: true },
+		'/**': { ssr: false },
 	},
 	// Runtime config for environment variables
 	runtimeConfig: {
