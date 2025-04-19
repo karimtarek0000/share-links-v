@@ -11,10 +11,9 @@ export default defineNuxtConfig({
 	},
 	// Hybrid rendering configuration using routeRules
 	routeRules: {
-		'/': { ssr: false },
+		'/**': { ssr: false },
 		'/error': { static: true },
 		'/profile/**': { ssr: true },
-		'/**': { ssr: false },
 	},
 	// Runtime config for environment variables
 	runtimeConfig: {
