@@ -8,21 +8,21 @@ const { detectPlatform } = useSocialPlatforms()
 const toast = useToast()
 const { params } = useRoute()
 
-// Create reactive form state
-const userData = reactive<UserData>({} as UserData)
-
 // This for make sure data will getting after redirect to the page
-await useAsyncData(async () => {
+const { data: userData } = await useAsyncData('profileData', async () => {
 	try {
 		const { body } = await getProfile(params.userid as string)
-		userData.name = body.name || ''
-		userData.bio = body.bio || ''
-		userData.profileImage = body.img || null
-		userData.socials = body.social_links.map((link: string) => ({
-			platform: detectPlatform(link).platform,
-			url: link,
-			icon: detectPlatform(link).icon,
-		}))
+		const userData = {
+			name: body.name || '',
+			bio: body.bio || '',
+			profileImage: body.img || null,
+			socials: body.social_links?.map((link: string) => {
+				const { platform, icon } = detectPlatform(link)
+				return { platform, url: link, icon }
+			}),
+		}
+
+		return userData as UserData
 	} catch (error: any) {
 		toast.add({
 			title: error.message || 'Error fetching profile data',
