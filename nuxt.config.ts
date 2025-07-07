@@ -95,6 +95,7 @@ export default defineNuxtConfig({
     '/**': { ssr: false },
     '/error': { prerender: true },
     '/profile/**': { swr: true },
+    '/auth/**': { ssr: false },
   },
   // Runtime config for environment variables
   runtimeConfig: {
