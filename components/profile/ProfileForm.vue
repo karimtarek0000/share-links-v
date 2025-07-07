@@ -527,10 +527,12 @@ defineExpose({ userData: state })
       <!-- Social Links Section -->
       <div>
         <div
-          class="flex justify-between items-center mb-5 bg-gray-50 p-4 rounded-lg"
+          class="flex max-md:flex-col max-md:gap-y-3 justify-between items-center mb-5 bg-gray-50 p-4 rounded-lg"
         >
           <div>
-            <h3 class="text-lg font-medium flex items-center gap-2">
+            <h3
+              class="text-lg font-medium flex justify-center items-center gap-2"
+            >
               <UIcon name="i-mdi-link-variant" class="text-primary" />
               Your Social Links
             </h3>
