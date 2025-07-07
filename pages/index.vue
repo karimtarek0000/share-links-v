@@ -16,7 +16,7 @@ useSeoMeta({
     <div class="flex flex-col md:flex-row gap-8 md:gap-12">
       <!-- Preview Section (Left on desktop, Top on mobile) -->
       <div
-        class="w-full md:w-2/5 flex justify-center sticky max-sm:top-[300px]"
+        class="w-full md:w-2/5 flex justify-center sticky max-md:top-[300px]"
       >
         <ProfilePreview
           :userData="
