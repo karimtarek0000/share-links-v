@@ -314,6 +314,8 @@ async function addNewProfile() {
       color: 'success',
       icon: 'i-mdi-check',
     })
+
+    user.value.noProfileCreatedYet = false
   } catch (error: any) {
     toast.add({
       title: error.message || 'Error saving profile',
