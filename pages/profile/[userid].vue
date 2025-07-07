@@ -24,13 +24,13 @@ const { data: userData } = await useAsyncData('profileData', async () => {
 
     return userData as UserData
   } catch (error: any) {
+    navigateTo('/auth/login')
     toast.add({
       title: error.message || 'Error fetching profile data',
       description: 'Failed to retrieve your profile data',
       color: 'error',
       icon: 'i-mdi-alert',
     })
-    navigateTo('/auth/login')
   }
 })
 

@@ -59,13 +59,13 @@ await useAsyncData(async () => {
 
     userId.value = body.id
     user.value.img = body.img
+    user.value.noProfileCreatedYet = false
   } catch (error: any) {
-    toast.add({
-      title: error.message || 'Error fetching profile data',
-      description: 'Failed to retrieve your profile data',
-      color: 'error',
-      icon: 'i-mdi-alert',
-    })
+    state.name = ''
+    state.bio = ''
+    state.profileImage = null
+    state.socials = []
+    user.value.noProfileCreatedYet = true
   }
 })
 
@@ -84,7 +84,7 @@ const isFormValid = computed(() => {
 const pathImg = computed(() => {
   if (!state.profileImage) return null
   const parts = state.profileImage.split('/')
-  return `${parts[parts.length - 2]}-${parts[parts.length - 1]}`
+  return `${parts[parts?.length - 2]}-${parts[parts?.length - 1]}`
 })
 
 // Payload for the profile data
@@ -183,7 +183,7 @@ function onDrop(event: DragEvent): void {
   isDragging.value = false
 
   const files = event.dataTransfer?.files
-  if (files && files.length > 0) {
+  if (files && files?.length > 0) {
     const fileInput = document.createElement('input')
     fileInput.type = 'file'
     fileInput.files = files
@@ -509,9 +509,9 @@ defineExpose({ userData: state })
           />
           <div
             class="absolute bottom-3 right-3 text-xs"
-            :class="state.bio.length > 150 ? 'text-red-500' : 'text-gray-500'"
+            :class="state.bio?.length > 150 ? 'text-red-500' : 'text-gray-500'"
           >
-            {{ state.bio.length }}/150
+            {{ state.bio?.length }}/150
           </div>
         </div>
         <template #error>
@@ -554,21 +554,21 @@ defineExpose({ userData: state })
         <p
           v-if="
             errors.find(
-              e => e.name.startsWith('socials') && e.name.length === 7,
+              e => e.name.startsWith('socials') && e.name?.length === 7,
             )
           "
           class="text-red-500 text-sm mb-4 bg-red-50 p-2 rounded"
         >
           {{
             errors.find(
-              e => e.name.startsWith('socials') && e.name.length === 7,
+              e => e.name.startsWith('socials') && e.name?.length === 7,
             )?.message
           }}
         </p>
 
         <!-- Empty state -->
         <div
-          v-if="!state.socials.length"
+          v-if="!state.socials?.length"
           class="text-center bg-gray-50 p-8 rounded-lg mb-5"
         >
           <UIcon name="i-mdi-link-off" class="text-gray-400 text-4xl mx-auto" />

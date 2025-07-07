@@ -147,7 +147,12 @@ const dropdownItems = [
             }"
           >
             <UCard>
-              <div class="flex items-center gap-2">
+              <div
+                :class="[
+                  'flex items-center gap-2 ',
+                  { 'pointer-events-none': user.noProfileCreatedYet },
+                ]"
+              >
                 <UInput
                   v-model="shareableLink"
                   readonly
