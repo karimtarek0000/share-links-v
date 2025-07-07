@@ -8,6 +8,8 @@ export default defineNuxtConfig({
     head: {
       titleTemplate: '%s | Share Profile Links',
       meta: [
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'description', content: 'Share your profile links easily.' },
       ],
     },

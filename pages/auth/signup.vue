@@ -65,6 +65,10 @@ const handleSubmit = async () => {
     isSubmitting.value = false
   }
 }
+
+useSeoMeta({
+  title: 'Sign Up',
+})
 </script>
 
 <template>

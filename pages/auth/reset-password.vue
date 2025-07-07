@@ -99,6 +99,10 @@ onMounted(() => {
     tokens.refresh_token = refresh_token
   }
 })
+
+useSeoMeta({
+  title: 'Reset Password',
+})
 </script>
 
 <template>

@@ -57,6 +57,10 @@ const handleSubmit = async () => {
     isSubmitting.value = false
   }
 }
+
+useSeoMeta({
+  title: 'Forgot Password',
+})
 </script>
 
 <template>

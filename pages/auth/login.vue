@@ -95,6 +95,10 @@ onMounted(() => {
     })
   }
 })
+
+useSeoMeta({
+  title: 'Login',
+})
 </script>
 
 <template>
