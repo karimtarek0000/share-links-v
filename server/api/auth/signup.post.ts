@@ -39,8 +39,6 @@ export default defineEventHandler(async event => {
       },
     })
 
-    console.log(config.public.appUrl)
-
     if (error) {
       return handleSupabaseError(error)
     }
