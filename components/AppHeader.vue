@@ -201,6 +201,12 @@ const dropdownItems = [
               </div>
             </UCard>
           </div>
+          <p
+            v-if="user.noProfileCreatedYet"
+            class="text-md mt-4 text-gray-700 max-w-2xl"
+          >
+            Create your profile first to generate a shareable link
+          </p>
         </div>
       </div>
 
