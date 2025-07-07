@@ -222,9 +222,3 @@ details.
 ## 👨‍💻 Author
 
 Created by [Karim Tarek](https://github.com/karimtarek)
-
----
-
-Last updated: April 17, 2025
-
-Made with ❤️ using [Nuxt 3](https://nuxt.com)
