@@ -156,12 +156,12 @@ async function onImageSelected(event: Event) {
       URL.revokeObjectURL(state.profileImage)
     }
 
+    imgFile.value = file
+    state.profileImage = URL.createObjectURL(file)
+
     if (state.profileImage && isOnline.value) {
       await deleteImgProfile(false)
     }
-
-    imgFile.value = file
-    state.profileImage = URL.createObjectURL(file)
 
     if (isOnline.value) {
       await uploadImgProfile()
