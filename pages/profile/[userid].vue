@@ -34,7 +34,7 @@ const { data: userData } = await useAsyncData('profileData', async () => {
   }
 })
 
-useSeoMeta({
+useServerSeoMeta({
   title: () => userData.value?.name,
   ogTitle: () => userData.value?.name,
   ogDescription: () => userData.value?.bio,
