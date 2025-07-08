@@ -114,7 +114,7 @@ export default defineNuxtConfig({
   routeRules: {
     '/**': { ssr: false },
     '/error': { prerender: true },
-    '/profile/**': { swr: true },
+    '/profile/**': { ssr: true },
     '/auth/**': { prerender: true },
   },
   // Runtime config for environment variables
