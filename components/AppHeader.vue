@@ -14,9 +14,7 @@ withDefaults(
 
 // State for the component
 const shareableLink = ref(
-  typeof window !== 'undefined'
-    ? `${window.location.origin}/profile/${user.value?.user.id}`
-    : '',
+  typeof window !== 'undefined' ? `${window.location.origin}/profile/${user.value?.user.id}` : '',
 )
 const copied = ref(false)
 let timeoutId: number | null = null
@@ -91,24 +89,10 @@ const dropdownItems = [
           class="absolute mt-2 flex rounded-full -top-5 shadow shadow-lg right-2 border border-blue-700"
         >
           <UButtonGroup>
-            <UButton
-              variant="subtle"
-              class="rounded-full overflow-hidden p-0 shadow-xl"
-            >
-              <div
-                class="size-12 rounded-full flex items-center justify-center"
-              >
-                <UAvatar
-                  v-if="user?.img"
-                  :src="user?.img"
-                  alt="User profile"
-                  size="xl"
-                />
-                <UIcon
-                  v-else
-                  name="i-mdi-account"
-                  class="text-gray-400 text-3xl"
-                />
+            <UButton variant="subtle" class="rounded-full overflow-hidden p-0 shadow-xl">
+              <div class="size-12 rounded-full flex items-center justify-center">
+                <UAvatar v-if="user?.img" :src="user?.img" alt="User profile" size="xl" />
+                <UIcon v-else name="i-mdi-account" class="text-gray-400 text-3xl" />
               </div>
             </UButton>
 
@@ -131,9 +115,7 @@ const dropdownItems = [
             Share Profile Links
           </h1>
         </div>
-        <p
-          class="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto font-light mb-6"
-        >
+        <p class="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto font-light mb-6">
           Create your personalized social links page in minutes
         </p>
 
@@ -150,7 +132,7 @@ const dropdownItems = [
               <div
                 :class="[
                   'flex items-center gap-2 ',
-                  { 'pointer-events-none': user.noProfileCreatedYet },
+                  { 'pointer-events-none': user?.noProfileCreatedYet },
                 ]"
               >
                 <UInput
@@ -167,9 +149,7 @@ const dropdownItems = [
                 <UButton
                   @click="copyToClipboard"
                   :class="[
-                    copied
-                      ? 'bg-purple-600'
-                      : 'bg-gradient-to-r from-purple-600 to-blue-600',
+                    copied ? 'bg-purple-600' : 'bg-gradient-to-r from-purple-600 to-blue-600',
                     'transition-all duration-300 relative overflow-hidden',
                   ]"
                   size="lg"
@@ -180,31 +160,20 @@ const dropdownItems = [
                     <UIcon
                       name="i-heroicons-clipboard"
                       class="h-5 w-5 text-white absolute inset-0 transition-all duration-300"
-                      :class="
-                        copied
-                          ? 'translate-y-8 opacity-0'
-                          : 'translate-y-0 opacity-100'
-                      "
+                      :class="copied ? 'translate-y-8 opacity-0' : 'translate-y-0 opacity-100'"
                     />
                     <!-- Check icon (moves from bottom) -->
                     <UIcon
                       name="i-heroicons-check"
                       class="h-5 w-5 text-white absolute inset-0 transition-all duration-300"
-                      :class="
-                        copied
-                          ? 'translate-y-0 opacity-100'
-                          : '-translate-y-8 opacity-0'
-                      "
+                      :class="copied ? 'translate-y-0 opacity-100' : '-translate-y-8 opacity-0'"
                     />
                   </div>
                 </UButton>
               </div>
             </UCard>
           </div>
-          <p
-            v-if="user.noProfileCreatedYet"
-            class="text-md mt-4 text-gray-700 max-w-2xl"
-          >
+          <p v-if="user?.noProfileCreatedYet" class="text-md mt-4 text-gray-700 max-w-2xl">
             Create your profile first to generate a shareable link
           </p>
         </div>

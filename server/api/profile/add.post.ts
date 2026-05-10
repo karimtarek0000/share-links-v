@@ -71,18 +71,22 @@ export default defineEventHandler(async event => {
 				return handleSupabaseError(adminError)
 			}
 
-			// Set status code to 201 for successful creation
 			setResponseStatus(event, 201)
-			return adminData[0]
+			return {
+				statusCode: 201,
+				body: adminData[0],
+			}
 		}
 
 		if (error) {
 			return handleSupabaseError(error)
 		}
 
-		// Set status code to 201 for successful creation
 		setResponseStatus(event, 201)
-		return data[0]
+		return {
+			statusCode: 201,
+			body: data[0],
+		}
 	} catch (err) {
 		const error = err as Error
 		return createError({

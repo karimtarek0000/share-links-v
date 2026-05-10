@@ -1,79 +1,85 @@
 interface Data {
-	body: {
-		error?: { message: string }
-		message?: string
-	}
-	error: boolean
-	statusCode: number
+  body: {
+    error?: { message: string }
+    message?: string
+  }
+  error: boolean
+  statusCode: number
 }
 
 export const useAuthApi = () => {
-	const signup = async (email: string, password: string, name: string) => {
-		try {
-			const data: Data = await $fetch('/api/auth/signup', {
-				method: 'POST',
-				body: {
-					email,
-					password,
-					name,
-				},
-			})
+  const signup = async (email: string, password: string, name: string) => {
+    try {
+      const data: Data = await $fetch('/api/auth/signup', {
+        method: 'POST',
+        body: {
+          email,
+          password,
+          name,
+        },
+      })
 
-			return data
-		} catch (err: any) {
-			return Promise.reject(err.response._data)
-		}
-	}
+      return data
+    } catch (err: any) {
+      return Promise.reject(err.response._data)
+    }
+  }
 
-	const login = async (email: string, password: string) => {
-		try {
-			const data = await $fetch('/api/auth/login', {
-				method: 'POST',
-				body: {
-					email,
-					password,
-				},
-			})
+  const login = async (email: string, password: string) => {
+    try {
+      const data = await $fetch('/api/auth/login', {
+        method: 'POST',
+        body: {
+          email,
+          password,
+        },
+      })
 
-			return data
-		} catch (err: any) {
-			return Promise.reject(err.response._data)
-		}
-	}
+      return data
+    } catch (err: any) {
+      return Promise.reject(err.response._data)
+    }
+  }
 
-	const forgotPassword = async (email: string) => {
-		try {
-			const data = await $fetch('/api/auth/forgot-password', {
-				method: 'POST',
-				body: {
-					email,
-				},
-			})
+  const forgotPassword = async (email: string) => {
+    try {
+      const data = await $fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        body: {
+          email,
+        },
+      })
 
-			return data
-		} catch (err: any) {
-			return Promise.reject(err.response._data)
-		}
-	}
+      return data
+    } catch (err: any) {
+      return Promise.reject(err.response._data)
+    }
+  }
 
-	const logout = async () => {
-		try {
-			const data = await $fetch('/api/auth/logout', {
-				method: 'POST',
-			})
+  const logout = async () => {
+    try {
+      // Call server-side logout
+      const data = await $fetch('/api/auth/logout', {
+        method: 'POST',
+      })
 
-			localStorage.removeItem('sb-jimcygitqskqhzefxgaw-auth-token')
+      // Clear localStorage token
+      localStorage.removeItem('sb-jimcygitqskqhzefxgaw-auth-token')
 
-			return data
-		} catch (err: any) {
-			return Promise.reject(err.response._data)
-		}
-	}
+      // Also clear client-side Supabase session
+      const { supabase } = useSupabase()
+      await supabase.auth.signOut()
 
-	return {
-		signup,
-		login,
-		logout,
-		forgotPassword,
-	}
+      return data
+    } catch (err: any) {
+      return Promise.reject(err.response._data)
+    }
+  }
+
+  return {
+    signup,
+    login,
+    logout,
+    forgotPassword,
+  }
 }

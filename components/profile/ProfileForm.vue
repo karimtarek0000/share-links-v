@@ -22,13 +22,8 @@ const isLoading = ref(false)
 // Get platform detection and toast
 const { detectPlatform, extractUsername } = useSocialPlatforms()
 const toast = useToast()
-const {
-  addProfile,
-  getProfile,
-  updateProfile,
-  uploadProfileImage,
-  deleteProfileImage,
-} = useProfileApi()
+const { addProfile, getProfile, updateProfile, uploadProfileImage, deleteProfileImage } =
+  useProfileApi()
 const { user } = useSupabase()
 const { isOnline, hasUnsavedChanges, isSyncing, activateSyncDataState } =
   useOfflineMode(fnSendDataToServer)
@@ -57,7 +52,7 @@ await useAsyncData(async () => {
       return { platform, url: link, icon }
     })
 
-    userId.value = body.id
+    userId.value = body.user_id
     user.value.img = body.img
     user.value.noProfileCreatedYet = false
   } catch (error: any) {
@@ -80,11 +75,11 @@ const isFormValid = computed(() => {
   return result.success
 })
 
-// Get the file name from the profile image URL
+// Get the current image path for deletion
 const pathImg = computed(() => {
   if (!state.profileImage) return null
-  const parts = state.profileImage.split('/')
-  return `${parts[parts?.length - 2]}-${parts[parts?.length - 1]}`
+  if (state.profileImage.startsWith('blob:')) return null
+  return state.profileImage
 })
 
 // Payload for the profile data
@@ -138,11 +133,7 @@ async function onImageSelected(event: Event) {
     }
 
     // Validate file type
-    if (
-      !['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(
-        file.type,
-      )
-    ) {
+    if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
       toast.add({
         title: 'Invalid file type',
         description: 'Please upload a JPG, PNG, GIF or WEBP image',
@@ -158,10 +149,6 @@ async function onImageSelected(event: Event) {
 
     imgFile.value = file
     state.profileImage = URL.createObjectURL(file)
-
-    if (state.profileImage && isOnline.value) {
-      await deleteImgProfile(false)
-    }
 
     if (isOnline.value) {
       await uploadImgProfile()
@@ -243,10 +230,7 @@ async function uploadImgProfile() {
 
   isLoading.value = true
   try {
-    const { body } = await uploadProfileImage(
-      imgFile.value as File,
-      user.value?.user.id,
-    )
+    const { body } = await uploadProfileImage(imgFile.value as File, user.value?.user.id)
 
     state.profileImage = body.publicUrl
     user.value.img = body.publicUrl
@@ -275,7 +259,10 @@ async function deleteImgProfile(statusAlert: boolean = true) {
 
   isLoading.value = true
   try {
-    await deleteProfileImage(user.value?.user.id, pathImg.value as string)
+    const imagePathToDelete = pathImg.value || user.value?.img
+    if (imagePathToDelete) {
+      await deleteProfileImage(user.value?.user.id, imagePathToDelete)
+    }
 
     imgFile.value = null
     state.profileImage = null
@@ -306,7 +293,9 @@ async function deleteImgProfile(statusAlert: boolean = true) {
 async function addNewProfile() {
   isLoading.value = true
   try {
-    await addProfile(profileData.value)
+    const res = await addProfile(profileData.value)
+    const row = res?.body ?? res
+    userId.value = row?.user_id ?? null
 
     toast.add({
       title: 'Profile saved successfully',
@@ -364,12 +353,7 @@ defineExpose({ userData: state })
 </script>
 
 <template>
-  <UForm
-    :validate="validateProfile"
-    :state="state"
-    class="space-y-6"
-    @submit="onSubmit"
-  >
+  <UForm :validate="validateProfile" :state="state" class="space-y-6" @submit="onSubmit">
     <UCard class="shadow-lg">
       <template #header>
         <div class="px-4 pt-4 text-center">
@@ -386,12 +370,8 @@ defineExpose({ userData: state })
               <UIcon name="f7:wifi-slash" />
               <span>Offline</span>
             </div>
-            <span v-if="hasUnsavedChanges && !isOnline" class="ml-1"
-              >(Changes saved locally)</span
-            >
-            <span v-if="isSyncing" class="ml-1 animate-pulse"
-              >(Syncing...)</span
-            >
+            <span v-if="hasUnsavedChanges && !isOnline" class="ml-1">(Changes saved locally)</span>
+            <span v-if="isSyncing" class="ml-1 animate-pulse">(Syncing...)</span>
           </div>
         </div>
       </template>
@@ -400,9 +380,7 @@ defineExpose({ userData: state })
       <div :class="['mb-6', { 'pointer-events-none': !isOnline }]">
         <div
           class="p-6 border-2 border-dashed rounded-xl flex flex-col items-center justify-center"
-          :class="
-            isDragging ? 'border-primary bg-primary/5' : 'border-gray-300'
-          "
+          :class="isDragging ? 'border-primary bg-primary/5' : 'border-gray-300'"
           @dragover="onDragOver"
           @dragleave="onDragLeave"
           @drop="onDrop"
@@ -418,11 +396,7 @@ defineExpose({ userData: state })
                 class="w-full h-full object-cover"
                 alt="Profile"
               />
-              <UIcon
-                v-else
-                name="i-mdi-account"
-                class="text-gray-400 text-3xl"
-              />
+              <UIcon v-else name="i-mdi-account" class="text-gray-400 text-3xl" />
               <!-- Hover overlay -->
               <div
                 v-if="state.profileImage"
@@ -436,9 +410,7 @@ defineExpose({ userData: state })
               </div>
             </div>
 
-            <div
-              class="space-y-2 max-md:flex max-md:flex-col max-md:items-center"
-            >
+            <div class="space-y-2 max-md:flex max-md:flex-col max-md:items-center">
               <UButton
                 color="primary"
                 variant="soft"
@@ -450,9 +422,7 @@ defineExpose({ userData: state })
               >
                 Upload Image
               </UButton>
-              <p class="text-xs text-gray-500 text-center">
-                JPG, PNG, GIF or WEBP (max 5MB)
-              </p>
+              <p class="text-xs text-gray-500 text-center">JPG, PNG, GIF or WEBP (max 5MB)</p>
             </div>
           </div>
 
@@ -485,10 +455,7 @@ defineExpose({ userData: state })
           @update:model-value="validateField('name')"
         />
         <template #error>
-          <p
-            v-if="errors.find(e => e.name === 'name')"
-            class="text-red-500 text-sm animate-pulse"
-          >
+          <p v-if="errors.find(e => e.name === 'name')" class="text-red-500 text-sm animate-pulse">
             {{ errors.find(e => e.name === 'name')?.message }}
           </p>
         </template>
@@ -517,10 +484,7 @@ defineExpose({ userData: state })
           </div>
         </div>
         <template #error>
-          <p
-            v-if="errors.find(e => e.name === 'bio')"
-            class="text-red-500 text-sm animate-pulse"
-          >
+          <p v-if="errors.find(e => e.name === 'bio')" class="text-red-500 text-sm animate-pulse">
             {{ errors.find(e => e.name === 'bio')?.message }}
           </p>
         </template>
@@ -532,58 +496,31 @@ defineExpose({ userData: state })
           class="flex max-md:flex-col max-md:gap-y-3 justify-between items-center mb-5 bg-gray-50 p-4 rounded-lg"
         >
           <div>
-            <h3
-              class="text-lg font-medium flex justify-center items-center gap-2"
-            >
+            <h3 class="text-lg font-medium flex justify-center items-center gap-2">
               <UIcon name="i-mdi-link-variant" class="text-primary" />
               Your Social Links
             </h3>
-            <p class="text-sm text-gray-600">
-              Add links to your social profiles
-            </p>
+            <p class="text-sm text-gray-600">Add links to your social profiles</p>
           </div>
-          <UButton
-            color="primary"
-            variant="soft"
-            icon="i-mdi-plus"
-            @click="addSocialLink"
-          >
+          <UButton color="primary" variant="soft" icon="i-mdi-plus" @click="addSocialLink">
             Add Link
           </UButton>
         </div>
 
         <!-- Social links validation message -->
         <p
-          v-if="
-            errors.find(
-              e => e.name.startsWith('socials') && e.name?.length === 7,
-            )
-          "
+          v-if="errors.find(e => e.name.startsWith('socials') && e.name?.length === 7)"
           class="text-red-500 text-sm mb-4 bg-red-50 p-2 rounded"
         >
-          {{
-            errors.find(
-              e => e.name.startsWith('socials') && e.name?.length === 7,
-            )?.message
-          }}
+          {{ errors.find(e => e.name.startsWith('socials') && e.name?.length === 7)?.message }}
         </p>
 
         <!-- Empty state -->
-        <div
-          v-if="!state.socials?.length"
-          class="text-center bg-gray-50 p-8 rounded-lg mb-5"
-        >
+        <div v-if="!state.socials?.length" class="text-center bg-gray-50 p-8 rounded-lg mb-5">
           <UIcon name="i-mdi-link-off" class="text-gray-400 text-4xl mx-auto" />
           <h4 class="text-gray-600 font-medium mt-3">No links added yet</h4>
-          <p class="text-gray-500 text-sm mt-2">
-            Add your first social media link to get started
-          </p>
-          <UButton
-            color="primary"
-            class="mt-4"
-            icon="i-mdi-plus"
-            @click="addSocialLink"
-          >
+          <p class="text-gray-500 text-sm mt-2">Add your first social media link to get started</p>
+          <UButton color="primary" class="mt-4" icon="i-mdi-plus" @click="addSocialLink">
             Add Your First Link
           </UButton>
         </div>
@@ -594,18 +531,12 @@ defineExpose({ userData: state })
             v-for="(social, index) in state.socials"
             :key="index"
             class="bg-gray-50 p-5 rounded-lg border border-gray-100 shadow-sm"
-            :class="
-              errors.find(e => e.name === `socials.${index}.url`)
-                ? 'border-red-300'
-                : ''
-            "
+            :class="errors.find(e => e.name === `socials.${index}.url`) ? 'border-red-300' : ''"
           >
             <div class="flex justify-between items-center mb-3">
               <span class="flex items-center gap-2">
                 <UIcon :name="social.icon" class="text-lg" />
-                <span class="font-medium capitalize">{{
-                  social.platform
-                }}</span>
+                <span class="font-medium capitalize">{{ social.platform }}</span>
                 <span
                   v-if="extractedUsernames[index]"
                   class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full"
@@ -632,11 +563,7 @@ defineExpose({ userData: state })
                     : 'https://example.com/your-profile'
                 "
                 icon="i-mdi-link-variant"
-                :color="
-                  errors.find(e => e.name === `socials.${index}.url`)
-                    ? 'error'
-                    : undefined
-                "
+                :color="errors.find(e => e.name === `socials.${index}.url`) ? 'error' : undefined"
                 class="w-full"
                 @update:model-value="handleUrlChange(social.url, index)"
               />
@@ -645,9 +572,7 @@ defineExpose({ userData: state })
                   v-if="errors.find(e => e.name === `socials.${index}.url`)"
                   class="text-red-500 text-sm animate-pulse"
                 >
-                  {{
-                    errors.find(e => e.name === `socials.${index}.url`)?.message
-                  }}
+                  {{ errors.find(e => e.name === `socials.${index}.url`)?.message }}
                 </p>
               </template>
             </UFormField>
@@ -667,13 +592,7 @@ defineExpose({ userData: state })
         >
           <UIcon v-show="isOnline" name="i-mdi-check" class="mr-1" />
           <UIcon v-show="!isOnline" name="i-mdi-cloud-sync" class="mr-1" />
-          {{
-            isOnline
-              ? userId
-                ? 'Update Profile'
-                : 'Create Profile'
-              : 'Save to sync later'
-          }}
+          {{ isOnline ? (userId ? 'Update Profile' : 'Create Profile') : 'Save to sync later' }}
         </UButton>
       </template>
     </UCard>
